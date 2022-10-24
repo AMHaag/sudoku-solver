@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 import Board from "../../components/Board";
 
 
+
 const Home: NextPage = () => {
   return (
     <>
