@@ -91,7 +91,7 @@ function findSubgrid(matrix, x, y) {
   return null;
 }
 
-function iterateThroughEmptyCells(matrix, cycles, guesses) {
+function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
   let iterations = cycles ? cycles : 1;
   let guessDepth = guesses ? guesses : 0;
   let possibilities = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -104,10 +104,12 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
     y: 0,
   };
   let valuesFound = 0;
-  let missingValues = 0;
   console.log(
-    `Iterations: ${iterations}, Guesses: ${guessDepth}, Missing Values: ${missingValues}`
+    `Iterations: ${iterations}, Guesses: ${guessDepth}, Missing Values: ${emptyCellsCount}`
   );
+  let missingValues = 0;
+  let failCell = '';
+
   //! Iterate through empty spaces
   for (let x = 0; x < 9; x++) {
     for (let y = 0; y < 9; y++) {
@@ -117,6 +119,9 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
         let row = board[x];
         let col = createCol(board, y);
         let subgrid = findSubgrid(board, x, y);
+        console.log(`${x}${y} row:${row}`)
+        console.log(`${x}${y} col:${col}`)
+        console.log(`${x}${y} sub:${subgrid}`)
         row.forEach((e) => {
           if (options.has(e)) {
             options.delete(e);
@@ -132,7 +137,16 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
             options.delete(e);
           }
         });
+        let cellOptions = [];
+        options.forEach((e) => {
+          cellOptions.push(e);
+        });
+        console.log(
+          `cell: ${x}${y} has ${options.size} possibilities: ${cellOptions}`
+        );
+
         if (options.size === 0) {
+          failCell = `${x}${y}`;
           impossibleSolution = true;
           break;
         }
@@ -146,10 +160,10 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
           bgc.possibilities = [];
           options.forEach((e) => {
             bgc.possibilities.push(e);
+            // console.log(
+            //   `cell: ${x}${y} has ${options.size} possibilities: ${bgc.possibilities}`
+            // );
           });
-          console.log(
-            `cell: ${x}${y} has ${options.size} possibilities: ${bgc.possibilities}`
-          );
           bgc.x = x;
           bgc.y = y;
         }
@@ -164,26 +178,29 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
     returnBoard: board,
     impossible: impossibleSolution,
     solved: false,
+    returnIterations: iterations,
+    returnGuesses: guessDepth,
   };
   //?if any cell has no possibilites return report
   if (impossibleSolution) {
-    console.error('solution false, acell has no possible values');
-    console.table(report.returnBoard);
+    console.error(
+      `solution false, ${failCell} has no possible values\n Guess Depth:${guessDepth}`
+    );
     return report;
   }
   //? if a cell is filled in iterate again
   if (valuesFound > 0) {
-    console.table(board);
-    console.log();
+    // console.table(board);
     iterations++;
-    iterateThroughEmptyCells(board, iterations, guessDepth);
+    iterateThroughEmptyCells(board, iterations, guessDepth, missingValues);
   }
   //? if no new values are found and there are no empty cells left check solution
-  if (valuesFound == 0 && missingValues == 0) {
+  if (valuesFound == 0 && missingValues < 1) {
+    console.warn('no empty cells remain');
     let solutionFound = checkFullMatrix(board);
     if (solutionFound) {
       console.log('solution found:' + solutionFound);
-      console.table(report.returnboard);
+      console.table(report.returnBoard);
       report.solved = true;
       return report;
     }
@@ -194,21 +211,37 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
   //? if no new values are found, try guessing best candidates
   if (valuesFound == 0) {
     guessDepth++;
-    for (const e in bgc.possibilities) {
-      const hypotheticalBoard = board;
-      hypotheticalBoard[bgc.x][bgc.y] = bgc.possibilities[e];
-      let { solved } = iterateThroughEmptyCells(
-        hypotheticalBoard,
-        iterations,
-        guessDepth
-      );
+    for (let g = 0; g < bgc.possibilities.length; g++) {
+      console.table(board);
+      console.log(`Does ${bgc.x}${bgc.y} = ${bgc.possibilities[g]}`);
+      const hypotheticalBoard = [];
+      for(let i =0;i<board.length;i++){
+        hypotheticalBoard.push(board[i])
+      }
+      hypotheticalBoard[bgc.x][bgc.y] = bgc.possibilities[g];
+      let { solved, returnBoard, returnGuesses, returnIterations } =
+        iterateThroughEmptyCells(
+          hypotheticalBoard,
+          iterations,
+          guessDepth,
+          missingValues
+        );
       if (solved) {
-        report.returnBoard = hypot;
-        return hypotheticalBoard;
+        board = returnBoard;
+        guessDepth = returnGuesses;
+        iterations = returnIterations;
+        missingValues = 0;
+        break;
+      }
+      if (!solved) {
+        console.log(`${bgc.x}${bgc.y} =/= ${bgc.possibilities[g]}`);
+        iterations = returnIterations;
+        missingValues = 1;
       }
     }
   }
 
+  iterateThroughEmptyCells(board,iterations,guessDepth,missingValues)
   return report;
 }
 console.time();
