@@ -33,7 +33,7 @@ function checkGroup(group) {
   return true;
 }
 function createSubgrid(matrix, x, y) {
-  return (subgrid = [
+  return [
     matrix[x][y],
     matrix[x][y + 1],
     matrix[x][y + 2],
@@ -43,21 +43,21 @@ function createSubgrid(matrix, x, y) {
     matrix[x + 2][y],
     matrix[x + 2][y + 1],
     matrix[x + 2][y + 2],
-  ]);
-}
-function createRow(matrix, x) {
-  const row = [
-    matrix[0][x],
-    matrix[1][x],
-    matrix[2][x],
-    matrix[3][x],
-    matrix[4][x],
-    matrix[5][x],
-    matrix[6][x],
-    matrix[7][x],
-    matrix[8][x],
   ];
-  return row;
+}
+function createCol(matrix, y) {
+  const col= [
+    matrix[0][y],
+    matrix[1][y],
+    matrix[2][y],
+    matrix[3][y],
+    matrix[4][y],
+    matrix[5][y],
+    matrix[6][y],
+    matrix[7][y],
+    matrix[8][y],
+  ];
+  return col;
 }
 
 function checkFullMatrix(matrix) {
@@ -65,12 +65,12 @@ function checkFullMatrix(matrix) {
     for (let i = 0; i < 9; i++) {
         if (!checkGroup(matrix[i])) {
           solutionIsValid = false;
-          console.log(`error in col ${i}`, matrix[i]);
+          console.log(`error in row ${i}`, matrix[i]);
           break;
         }
-        if (!checkGroup(createRow(matrix, i))) {
+        if (!checkGroup(createCol(matrix, i))) {
           solutionIsValid = false;
-          console.log(`error in row ${i}`, createRow(matrix, i));
+          console.log(`error in col ${i}`, createCol(matrix, i));
           break;
         }
   }
@@ -90,6 +90,5 @@ function checkFullMatrix(matrix) {
 
   return solutionIsValid;
 }
-console.time()
-console.log(checkFullMatrix(testGrid));
-console.timeEnd()
+
+export {createSubgrid,createCol,checkFullMatrix}
