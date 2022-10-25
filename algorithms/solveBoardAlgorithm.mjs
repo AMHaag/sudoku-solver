@@ -160,15 +160,15 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
     }
   }
   //! next action
-    let report = {
-      returnBoard: board,
-      impossible:impossibleSolution,
-      solved: false,
-    };
-    //?if any cell has no possibilites return report
+  let report = {
+    returnBoard: board,
+    impossible: impossibleSolution,
+    solved: false,
+  };
+  //?if any cell has no possibilites return report
   if (impossibleSolution) {
     console.error('solution false, acell has no possible values');
-    console.table(report.returnBoard)
+    console.table(report.returnBoard);
     return report;
   }
   //? if a cell is filled in iterate again
@@ -176,19 +176,19 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
     console.table(board);
     console.log();
     iterations++;
-    iterateThroughEmptyCells(board, iterations,guessDepth);
+    iterateThroughEmptyCells(board, iterations, guessDepth);
   }
   //? if no new values are found and there are no empty cells left check solution
   if (valuesFound == 0 && missingValues == 0) {
     let solutionFound = checkFullMatrix(board);
     if (solutionFound) {
       console.log('solution found:' + solutionFound);
-      console.table(report.returnboard)
-      report.solved=true;
+      console.table(report.returnboard);
+      report.solved = true;
       return report;
     }
     console.error('no possible solution found');
-    console.table(report.returnBoard)
+    console.table(report.returnBoard);
     return report;
   }
   //? if no new values are found, try guessing best candidates
@@ -203,7 +203,7 @@ function iterateThroughEmptyCells(matrix, cycles, guesses) {
         guessDepth
       );
       if (solved) {
-        report.returnBoard = hypot
+        report.returnBoard = hypot;
         return hypotheticalBoard;
       }
     }
