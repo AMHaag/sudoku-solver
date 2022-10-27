@@ -1,116 +1,59 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   createSubgrid,
   createCol,
   checkFullMatrix,
 } from './validateSolution.mjs';
+import {Board,BoardOfPossibleValues} from './classes.mjs'
+import {testGrid,veryEasy,easy,medium,hard} from './testCases.mjs'
 
-const testGrid = [
-  [5, 3, 4, 6, 7, 8, 9, 1, 2],
-  [6, 7, 2, 1, 9, 5, 3, 4, 8],
-  [1, 9, 8, 3, 4, 2, 5, 6, 7],
-  [8, 5, 9, 7, 6, 1, 4, 2, 3],
-  [4, 2, 6, 8, 5, 3, 7, 9, 1],
-  [7, 1, 3, 9, 0, 4, 8, 5, 6],
-  [9, 6, 1, 5, 3, 7, 2, 8, 4],
-  [2, 8, 7, 4, 1, 0, 6, 3, 5],
-  [3, 4, 5, 2, 8, 6, 1, 7, 0],
-];
-const veryEasy = [
-  [0, 0, 7, 0, 0, 0, 0, 2, 0],
-  [4, 1, 9, 6, 0, 0, 0, 0, 8],
-  [2, 3, 8, 0, 0, 0, 6, 9, 5],
-  [3, 0, 4, 2, 0, 9, 8, 1, 0],
-  [1, 0, 2, 8, 7, 0, 0, 4, 9],
-  [8, 0, 5, 1, 6, 4, 2, 7, 3],
-  [0, 0, 3, 5, 0, 1, 4, 0, 7],
-  [0, 0, 0, 0, 0, 6, 3, 5, 0],
-  [5, 0, 6, 7, 3, 2, 9, 0, 1],
-];
-const easy = [
-  [2, 4, 0, 0, 0, 0, 0, 0, 3],
-  [0, 0, 1, 6, 0, 0, 4, 2, 0],
-  [8, 0, 0, 0, 4, 0, 0, 0, 1],
-  [0, 6, 0, 9, 7, 0, 0, 0, 0],
-  [9, 7, 0, 1, 8, 0, 0, 0, 5],
-  [1, 0, 4, 3, 5, 6, 0, 9, 2],
-  [0, 0, 0, 8, 2, 3, 0, 0, 6],
-  [0, 0, 3, 0, 9, 5, 8, 1, 7],
-  [0, 5, 0, 7, 0, 0, 2, 0, 0],
-];
-const medium = [
-  [0, 5, 0, 0, 0, 7, 0, 0, 8],
-  [0, 0, 0, 0, 1, 0, 0, 0, 0],
-  [0, 3, 8, 0, 5, 6, 1, 0, 0],
-  [1, 0, 0, 0, 0, 9, 7, 0, 0],
-  [9, 0, 0, 0, 6, 0, 4, 0, 0],
-  [0, 0, 0, 0, 3, 0, 0, 6, 2],
-  [2, 4, 0, 0, 0, 0, 0, 0, 9],
-  [0, 6, 7, 0, 9, 0, 3, 2, 0],
-  [0, 1, 0, 5, 8, 0, 0, 0, 4],
-];
-const hard = [
-  [0, 1, 0, 0, 2, 0, 0, 5, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 9, 0, 7, 0, 6, 3, 0, 0],
-  [0, 0, 6, 0, 0, 1, 0, 8, 9],
-  [0, 0, 0, 0, 8, 0, 4, 6, 0],
-  [0, 0, 9, 0, 0, 2, 5, 1, 0],
-  [5, 0, 0, 0, 4, 0, 0, 0, 0],
-  [0, 0, 0, 6, 5, 0, 7, 0, 0],
-  [0, 6, 0, 0, 7, 0, 1, 9, 0],
-];
 
-function findSubgrid(matrix, x, y) {
-  if (x < 3 && y < 3) {
-    return createSubgrid(matrix, 0, 0);
-  }
-  if (x < 3 && y < 6) {
-    return createSubgrid(matrix, 0, 3);
-  }
-  if (x < 3 && y < 9) {
-    return createSubgrid(matrix, 0, 6);
-  }
-  if (x < 6 && y < 3) {
-    return createSubgrid(matrix, 3, 0);
-  }
-  if (x < 6 && y < 6) {
-    return createSubgrid(matrix, 3, 3);
-  }
-  if (x < 6 && y < 9) {
-    return createSubgrid(matrix, 3, 6);
-  }
-  if (x < 9 && y < 3) {
-    return createSubgrid(matrix, 6, 0);
-  }
-  if (x < 9 && y < 6) {
-    return createSubgrid(matrix, 6, 3);
-  }
-  if (x < 9 && y < 9) {
-    return createSubgrid(matrix, 6, 6);
-  }
-  return null;
+function findFirstSolution(matrix){
+  const board = matix;
+  const cycleCount = 0
+}
+function iterateCellsAndGroups(boardInput,cycleCount){
+  let valuesFound =0;
+  let board = new Board(boardInput)
 }
 
+
+
 function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
-  let iterations = cycles ? cycles : 1;
+  //! Declare variables
+  totalCycles++;
+  let iterations = totalCycles;
   let guessDepth = guesses ? guesses : 0;
-  let possibilities = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const possibilities = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   let board = matrix;
   let impossibleSolution = false;
-  //?bgc = best guess candidate, the cell with fewest possiblities
+  //bgc = best guess candidate, the cell with fewest possiblities
   let bgc = {
     possibilities: [, , , , , , , , , , , , ,],
     x: 0,
     y: 0,
   };
   let valuesFound = 0;
+  //TODO uncomment this for runtime
   console.log(
     `Iterations: ${iterations}, Guesses: ${guessDepth}, Missing Values: ${emptyCellsCount}`
   );
   let missingValues = 0;
   let failCell = '';
+  let boardOfPossibleValues = [
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+  ];
 
-  //! Iterate through empty spaces
+  //! Iterate through empty spaces, check number of possible values
+  //TODO Update iterations to add each possibility to a possibilities board
   for (let x = 0; x < 9; x++) {
     for (let y = 0; y < 9; y++) {
       if (!board[x][y]) {
@@ -119,9 +62,6 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
         let row = board[x];
         let col = createCol(board, y);
         let subgrid = findSubgrid(board, x, y);
-        console.log(`${x}${y} row:${row}`)
-        console.log(`${x}${y} col:${col}`)
-        console.log(`${x}${y} sub:${subgrid}`)
         row.forEach((e) => {
           if (options.has(e)) {
             options.delete(e);
@@ -137,10 +77,8 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
             options.delete(e);
           }
         });
-        let cellOptions = [];
-        options.forEach((e) => {
-          cellOptions.push(e);
-        });
+        let cellOptions = Array.from(options);
+        //TODO uncomment this for runtime
         console.log(
           `cell: ${x}${y} has ${options.size} possibilities: ${cellOptions}`
         );
@@ -152,18 +90,16 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
         }
         if (options.size === 1) {
           valuesFound++;
-          let answer;
-          options.forEach((e) => (answer = e));
+          let answer = Array.from(options);
+          answer = answer.toString();
+          answer = parseInt(answer);
           board[x][y] = answer;
+          //TODO uncomment this for runtime
+          console.log(`Cell:${x}${y} assigned value ${answer}`);
         }
+        boardOfPossibleValues[x][y] = cellOptions.toString();
         if (options.size < bgc.possibilities.length) {
-          bgc.possibilities = [];
-          options.forEach((e) => {
-            bgc.possibilities.push(e);
-            // console.log(
-            //   `cell: ${x}${y} has ${options.size} possibilities: ${bgc.possibilities}`
-            // );
-          });
+          bgc.possibilities = Array.from(options);
           bgc.x = x;
           bgc.y = y;
         }
@@ -173,6 +109,89 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
       break;
     }
   }
+
+  //! Iterate through sets
+  function checkSetForStandAlone(set, i, setType) {
+    if (!setType) {
+      throw error;
+    }
+    //go through cell in bopv checking how many times number i appears
+    let checkSet = set;
+    //num = the number we are lookingfor
+    for (let num = 1; num < 10; num++) {
+      let countOfTestNum = 0;
+      let homeOfStandAlone;
+      //j= the index of current set being checked for a certain num
+      for (let j = 0; j < 9; j++) {
+        let possString = checkSet[j];
+        if (typeof possString == Number && possString == num) {
+          countOfTestNum++;
+        }
+        if (typeof possString == String) {
+          if (possString.includes(num)) {
+            countOfTestNum++;
+          }
+        }
+      }
+      // console.log(
+      //   `checkSet:${checkSet} number:${num} countOfTestNum:${countOfTestNum}`
+      // );
+
+      if (countOfTestNum == 1) {
+        //refind the item with a standalone value
+        for (let j = 0; j < 9; j++) {
+          let possString = checkSet[j];
+          // console.log('possString'+possString)
+          if (possString.includes(num)) {
+            homeOfStandAlone = j;
+            // console.log(homeOfStandAlone)
+            break;
+          }
+        }
+        //remove that value from bopv and add it to the board
+        if (setType == 'row') {
+          let numAsString = `${num}`;
+          let oldString = boardOfPossibleValues[i][homeOfStandAlone];
+          // console.error(oldString)
+          let newString = oldString.replace(num, '');
+
+          boardOfPossibleValues[i][homeOfStandAlone] = newString;
+          board[i][homeOfStandAlone] = num;
+          valuesFound++;
+        }
+        if (setType == 'col') {
+          boardOfPossibleValues[homeOfStandAlone][i].replace(`${num}`, '');
+          board[homeOfStandAlone][i] = num;
+          valuesFound++;
+        }
+        if (setType == 'subgrid') {
+          let coordinateArray = findCoordinatesOfSubgrid(i);
+          let { x, y } = parseSubgridSet(coordinateArray, homeOfStandAlone);
+          boardOfPossibleValues[x][y].replace(`$num`, '');
+          board[x][y] = num;
+          valuesFound++;
+          console.table(board);
+        }
+      }
+    }
+    //if number i appears only once, add that value to the board and increment valuesFound
+    //remove i from the rest of the row,col&subgrid bopv
+  }
+  //TODO iterate through each set's bop and see if any cell is the only cell to contain each number
+  if (missingValues > 0) {
+    for (let i = 0; i < 9; i++) {
+      let currentCol = createCol(boardOfPossibleValues, i);
+      let currentSubgrid = createSubgridSet(i);
+      console.log(currentCol);
+      checkSetForStandAlone(boardOfPossibleValues[i], i, 'row');
+      checkSetForStandAlone(currentCol, i, 'col');
+      checkSetForStandAlone(currentSubgrid, i, 'subgrid');
+      console.table(boardOfPossibleValues[i]);
+      console.table(board);
+      console.log('fuck');
+    }
+  }
+
   //! next action
   let report = {
     returnBoard: board,
@@ -190,13 +209,12 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
   }
   //? if a cell is filled in iterate again
   if (valuesFound > 0) {
-    // console.table(board);
-    iterations++;
+    console.warn(`${valuesFound} values have been found`);
     iterateThroughEmptyCells(board, iterations, guessDepth, missingValues);
   }
   //? if no new values are found and there are no empty cells left check solution
   if (valuesFound == 0 && missingValues < 1) {
-    console.warn('no empty cells remain');
+    console.info('no empty cells remain');
     let solutionFound = checkFullMatrix(board);
     if (solutionFound) {
       console.log('solution found:' + solutionFound);
@@ -210,40 +228,124 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
   }
   //? if no new values are found, try guessing best candidates
   if (valuesFound == 0) {
-    guessDepth++;
-    for (let g = 0; g < bgc.possibilities.length; g++) {
-      console.table(board);
-      console.log(`Does ${bgc.x}${bgc.y} = ${bgc.possibilities[g]}`);
-      const hypotheticalBoard = [];
-      for(let i =0;i<board.length;i++){
-        hypotheticalBoard.push(board[i])
-      }
-      hypotheticalBoard[bgc.x][bgc.y] = bgc.possibilities[g];
-      let { solved, returnBoard, returnGuesses, returnIterations } =
-        iterateThroughEmptyCells(
+    console.table(board);
+    function makeGuess(matrix, bestGuess) {
+      guessDepth++;
+      for (let g = 0; g < bestGuess.possibilities.length; g++) {
+        console.log(
+          `Guess #${guessDepth} Does ${bestGuess.x}${bestGuess.y} = ${bestGuess.possibilities[g]}`
+        );
+        let hypotheticalBoard = matrix;
+        console.table(hypotheticalBoard);
+        hypotheticalBoard[bestGuess.x][bestGuess.y] =
+          bestGuess.possibilities[g];
+        let { solved, returnBoard } = iterateThroughEmptyCells(
           hypotheticalBoard,
-          iterations,
+          totalCycles,
           guessDepth,
           missingValues
         );
-      if (solved) {
-        board = returnBoard;
-        guessDepth = returnGuesses;
-        iterations = returnIterations;
-        missingValues = 0;
-        break;
-      }
-      if (!solved) {
-        console.log(`${bgc.x}${bgc.y} =/= ${bgc.possibilities[g]}`);
-        iterations = returnIterations;
-        missingValues = 1;
+        if (solved) {
+          // board = returnBoard;
+          guessDepth = returnGuesses;
+          missingValues = 0;
+          return { solved, returnBoard, guessDepth, missingValues };
+        }
+        if (!solved) {
+          console.log(
+            `${bestGuess.x}${bestGuess.y} =/= ${bestGuess.possibilities[g]}`
+          );
+          missingValues = 1;
+          hypotheticalBoard = matrix;
+        }
       }
     }
+    makeGuess(board, bgc);
+    iterateThroughEmptyCells(board, iterations, guessDepth, missingValues);
   }
 
-  iterateThroughEmptyCells(board,iterations,guessDepth,missingValues)
+  // iterateThroughEmptyCells(board, totalCycles, guessDepth, missingValues);
+  console.dir(report);
   return report;
 }
-console.time();
-iterateThroughEmptyCells(hard);
-console.timeEnd();
+// console.time('test One');
+// iterateThroughEmptyCells(easy, totalCycles);
+// console.timeEnd('test One');
+
+console.time('test Hard');
+iterateThroughEmptyCells(hard, totalCycles);
+console.timeEnd('test Hard');
+
+
+
+//TODO Delte these if I don't need them, they should be in the classes now
+// function findSubgrid(matrix, x, y) {
+//   if (x < 3 && y < 3) {
+//     return createSubgrid(matrix, 0, 0);
+//   }
+//   if (x < 3 && y < 6) {
+//     return createSubgrid(matrix, 0, 3);
+//   }
+//   if (x < 3 && y < 9) {
+//     return createSubgrid(matrix, 0, 6);
+//   }
+//   if (x < 6 && y < 3) {
+//     return createSubgrid(matrix, 3, 0);
+//   }
+//   if (x < 6 && y < 6) {
+//     return createSubgrid(matrix, 3, 3);
+//   }
+//   if (x < 6 && y < 9) {
+//     return createSubgrid(matrix, 3, 6);
+//   }
+//   if (x < 9 && y < 3) {
+//     return createSubgrid(matrix, 6, 0);
+//   }
+//   if (x < 9 && y < 6) {
+//     return createSubgrid(matrix, 6, 3);
+//   }
+//   if (x < 9 && y < 9) {
+//     return createSubgrid(matrix, 6, 6);
+//   }
+//   return null;
+// }
+// function findCoordinatesOfSubgrid(i) {
+//   switch (i) {
+//     case 0:
+//       return ['0,0', '0,1', '0,2', '1,0', '1,1', '1,2', '2,0', '2,1', '2,2'];
+//     case 1:
+//       return ['0,3', '0,4', '0,5', '1,3', '1,4', '1,5', '2,3', '2,4', '2,5'];
+//     case 2:
+//       return ['0,6', '0,7', '0,8', '1,6', '1,7', '1,8', '2,6', '2,7', '2,8'];
+//     case 3:
+//       return ['3,0', '3,1', '3,2', '4,0', '4,1', '4,2', '5,0', '5,1', '5,2'];
+//     case 4:
+//       return ['3,3', '3,4', '3,5', '4,3', '4,4', '4,5', '5,3', '5,4', '5,5'];
+//     case 5:
+//       return ['3,6', '3,7', '3,8', '4,6', '4,7', '4,8', '5,6', '5,7', '5,8'];
+//     case 6:
+//       return ['6,0', '6,1', '6,2', '7,0', '7,1', '7,2', '8,0', '8,1', '8,2'];
+//     case 7:
+//       return ['6,3', '6,4', '6,5', '7,3', '7,4', '7,5', '8,0', '8,1', '8,2'];
+//     case 8:
+//       return ['6,6', '6,7', '6,8', '7,6', '7,7', '7,8', '8,6', '8,7', '8,8'];
+//     default:
+//       break;
+//   }
+// }
+// function parseSubgridSet(string, i) {
+//   let x = string.charAt(0);
+//   let y = string.charAt(2);
+//   return { x, y };
+// }
+
+// //! I think this is fucked up, but I'm tired now
+// function createSubgridSet(matrix, i) {
+//   let coordinates = findCoordinatesOfSubgrid(i);
+//   let newset = [];
+//   coordinates.forEach((e) => {
+//     let { x, y } = parseSubgridSet(e);
+//     newset.push(matrix[x][y]);
+//   });
+//   return newset;
+// }

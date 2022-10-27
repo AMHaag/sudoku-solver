@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const testGrid = [
   [5, 3, 4, 6, 7, 8, 9, 1, 2],
   [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -46,7 +47,7 @@ function createSubgrid(matrix, x, y) {
   ];
 }
 function createCol(matrix, y) {
-  const col= [
+  const col = [
     matrix[0][y],
     matrix[1][y],
     matrix[2][y],
@@ -62,17 +63,17 @@ function createCol(matrix, y) {
 
 function checkFullMatrix(matrix) {
   let solutionIsValid = true;
-    for (let i = 0; i < 9; i++) {
-        if (!checkGroup(matrix[i])) {
-          solutionIsValid = false;
-          console.log(`error in row ${i}`, matrix[i]);
-          break;
-        }
-        if (!checkGroup(createCol(matrix, i))) {
-          solutionIsValid = false;
-          console.log(`error in col ${i}`, createCol(matrix, i));
-          break;
-        }
+  for (let i = 0; i < 9; i++) {
+    if (!checkGroup(matrix[i])) {
+      solutionIsValid = false;
+      console.log(`error in row ${i}`, matrix[i]);
+      break;
+    }
+    if (!checkGroup(createCol(matrix, i))) {
+      solutionIsValid = false;
+      console.log(`error in col ${i}`, createCol(matrix, i));
+      break;
+    }
   }
   for (let x = 0; x < 9; x += 3) {
     for (let y = 0; y < 9; y += 3) {
@@ -91,4 +92,4 @@ function checkFullMatrix(matrix) {
   return solutionIsValid;
 }
 
-export {createSubgrid,createCol,checkFullMatrix}
+export { createSubgrid, createCol, checkFullMatrix };
