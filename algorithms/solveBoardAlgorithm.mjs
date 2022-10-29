@@ -4,20 +4,308 @@ import {
   createCol,
   checkFullMatrix,
 } from './validateSolution.mjs';
-import {Board,BoardOfPossibleValues} from './classes.mjs'
-import {testGrid,veryEasy,easy,medium,hard} from './testCases.mjs'
+import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
+import { testGrid, veryEasy, easy, medium, hard } from './testCases.mjs';
 
+function findFirstSolution(matrix) {
+  const board = new Board(matrix);
+  /** Board of Possible Values */
+  let BoPV = new BoardOfPossibleValues(emptyStringMatrix);
+  let showDetailsInConsole = true;
+  let cycleCount = 0;
+  function iterateCellsAndGroups() {
+    let valuesFound = 0;
+    let failCell = '';
+    cycleCount++;
+    console.log(
+      `*** Iterations: ${cycleCount}, Guesses: ${0}, Missing Values: ${
+        board.missingValues || 'n/a'
+      }, Numbers Remaining: ${board.numsAvail.returnArrayOfAvailableNums(0)}`
+    );
+    console.table(board.grid);
+    console.table(BoPV.grid);
+    function iterateCells() {
+      board.missingValues = 0;
+      for (let x = 0; x < 9; x++) {
+        for (let y = 0; y < 9; y++) {
+          if (cycleCount === 1 && board.grid[x][y] > 0) {
+            let n = board.grid[x][y];
+            board.numsAvail.decrementNumAvail(n);
+            if (showDetailsInConsole) {
+              console.log(`Cell: ${x}${y} is ${n}`);
+            }
+          }
+          if (!board.grid[x][y]) {
+            board.missingValues++;
+            let options = new Set(board.numsAvail.returnArrayOfAvailableNums());
+            let row = board.returnRowArray(x);
+            let col = board.returnColArray(y);
+            let subgrid = board.returnSubgridArrayByCoordinate(x, y);
+            row.forEach((e) => {
+              if (options.has(e)) {
+                options.delete(e);
+              }
+            });
+            col.forEach((e) => {
+              if (options.has(e)) {
+                options.delete(e);
+              }
+            });
+            subgrid.forEach((e) => {
+              if (options.has(e)) {
+                options.delete(e);
+              }
+            });
+            let cellOptions = Array.from(options);
 
-function findFirstSolution(matrix){
-  const board = matix;
-  const cycleCount = 0
+            if (options.size === 0) {
+              failCell = `${x}${y}`;
+              // impossibleSolution = true;
+              console.error(`cell:${failCell} has no possible answers`);
+              break;
+            }
+            if (options.size === 1) {
+              let answer = Array.from(options);
+              answer = answer.toString();
+              answer = parseInt(answer);
+              valuesFound++;
+              board.numsAvail.decrementNumAvail(answer);
+              board.updateCell(answer, x, y);
+              BoPV.overwriteCell('', x, y);
+              if (showDetailsInConsole) {
+                console.log(`Cell: ${x}${y} assigned value ${answer}`);
+              }
+            }
+            if (options.size > 1) {
+              if (showDetailsInConsole) {
+                console.log(
+                  `Cell: ${x}${y} has ${options.size} possibilities: ${cellOptions}`
+                );
+              }
+              BoPV.updateCellViaArray(cellOptions, x, y);
+            }
+          }
+        }
+      }
+    }
+    function iterateGroups() {
+      let a = board.numsAvail.returnArrayOfAvailableNums();
+      a.forEach((cv) => {
+        let n = cv;
+        for (let g = 0; g < 9; g++) {
+          let subject = {
+            row: board.returnRowArray(g),
+            col: board.returnColArray(g),
+            sub: board.returnSubgridArray(g),
+            rowOptions: BoPV.returnRowArray(g),
+            colOptions: BoPV.returnColArray(g),
+            subOptions: BoPV.returnSubgridArray(g),
+          };
+          if (
+            subject.row.includes(n) &&
+            subject.col.includes(n) &&
+            subject.sub.includes(n)
+          ) {
+            continue;
+          }
+          if (!subject.row.includes(n)) {
+            let cellsThatCanContainN = 0;
+            let indexOfN = 10;
+            subject.rowOptions.forEach((cv, i) => {
+              if (cv.includes(n)) {
+                cellsThatCanContainN++;
+                indexOfN = i;
+              }
+            });
+            if (cellsThatCanContainN == 1) {
+              if (board.grid[g][indexOfN] !== 0) {
+                throw 'ERROR: CELL ALREADY FULL :row';
+              }
+              board.grid[g][indexOfN] = n;
+              BoPV.overwriteCell('', g, indexOfN);
+              valuesFound++;
+              board.numsAvail.decrementNumAvail(n);
+              board.missingValue--;
+              if (showDetailsInConsole) {
+                console.log(
+                  `Cell: ${g}${indexOfN} assigned value ${n} via row group elimination`
+                );
+              }
+              continue;
+            }
+          }
+          if (!subject.col.includes(n)) {
+            subject = {
+              row: board.returnRowArray(g),
+              col: board.returnColArray(g),
+              sub: board.returnSubgridArray(g),
+              rowOptions: BoPV.returnRowArray(g),
+              colOptions: BoPV.returnColArray(g),
+              subOptions: BoPV.returnSubgridArray(g),
+            };
+            let cellsThatCanContainN = 0;
+            let indexOfN = 10;
+            subject.colOptions.forEach((cv, i) => {
+              console.log(typeof cv);
+              if (cv.includes(n)) {
+                cellsThatCanContainN++;
+                indexOfN = i;
+              }
+            });
+            if (cellsThatCanContainN == 1) {
+              if (board.grid[indexOfN][g] !== 0) {
+                throw 'ERROR: CELL ALREADY FULL :col';
+              }
+              console.table(cycleCount, subject.col);
+              console.table(subject.colOptions);
+              board.updateCell(n, indexOfN, g);
+              BoPV.overwriteCell('', indexOfN, g);
+              valuesFound++;
+              board.numsAvail.decrementNumAvail(n);
+              board.missingValue--;
+              if (showDetailsInConsole) {
+                console.log(
+                  `Cell: ${indexOfN}${g} assigned value${n} via col group elimination`
+                );
+              }
+
+              continue;
+            }
+          }
+          if (!subject.sub.includes(n)) {
+            subject = {
+              row: board.returnRowArray(g),
+              col: board.returnColArray(g),
+              sub: board.returnSubgridArray(g),
+              rowOptions: BoPV.returnRowArray(g),
+              colOptions: BoPV.returnColArray(g),
+              subOptions: BoPV.returnSubgridArray(g),
+            };
+            let cellsThatCanContainN = 0;
+            let indexOfN = 10;
+            subject.subOptions.forEach((cv, i) => {
+              if (cv.includes(n)) {
+                cellsThatCanContainN++;
+                indexOfN = i;
+              }
+            });
+            if (cellsThatCanContainN == 1) {
+              // if (board.grid[g][indexOfN] !== 0) {
+              //   throw 'ERROR: CELL ALREADY FULL :sub';
+              // }
+              board.updateCellViaSubgridIndex(g, indexOfN, n);
+              let xy = BoPV.updateCellViaSubgridIndex(g, indexOfN, '');
+              BoPV.updateCellViaSubgridIndex(g, indexOfN, n.toString());
+              valuesFound++;
+              board.numsAvail.decrementNumAvail(n);
+              board.missingValue--;
+              if (showDetailsInConsole) {
+                console.log(
+                  `Cell: ${xy} assigned value ${n} via subgrid group elimination`
+                );
+              }
+            }
+          }
+        }
+      });
+    }
+    iterateCells();
+    if (board.missingValues > 0) {
+      iterateGroups();
+    }
+    if (valuesFound > 0) {
+      // console.table(BoPV.grid);
+      iterateCellsAndGroups();
+    }
+  }
+
+  iterateCellsAndGroups();
+  if (board.missingValues == 0) {
+    let solved = checkFullMatrix(board.grid);
+    console.log(`Solution Valid:${solved}`);
+    console.table(board.grid);
+  }
+  if (board.missingValues > 0) {
+    console.table(board.grid);
+    console.table(BoPV.grid);
+  }
 }
-function iterateCellsAndGroups(boardInput,cycleCount){
-  let valuesFound =0;
-  let board = new Board(boardInput)
-}
 
+console.time('Time to Solve');
+findFirstSolution(medium);
+console.timeEnd('Time to Solve');
 
+//TODO Delte these if I don't need them, they should be in the classes now
+// function findSubgrid(matrix, x, y) {
+//   if (x < 3 && y < 3) {
+//     return createSubgrid(matrix, 0, 0);
+//   }
+//   if (x < 3 && y < 6) {
+//     return createSubgrid(matrix, 0, 3);
+//   }
+//   if (x < 3 && y < 9) {
+//     return createSubgrid(matrix, 0, 6);
+//   }
+//   if (x < 6 && y < 3) {
+//     return createSubgrid(matrix, 3, 0);
+//   }
+//   if (x < 6 && y < 6) {
+//     return createSubgrid(matrix, 3, 3);
+//   }
+//   if (x < 6 && y < 9) {
+//     return createSubgrid(matrix, 3, 6);
+//   }
+//   if (x < 9 && y < 3) {
+//     return createSubgrid(matrix, 6, 0);
+//   }
+//   if (x < 9 && y < 6) {
+//     return createSubgrid(matrix, 6, 3);
+//   }
+//   if (x < 9 && y < 9) {
+//     return createSubgrid(matrix, 6, 6);
+//   }
+//   return null;
+// }
+// function findCoordinatesOfSubgrid(i) {
+//   switch (i) {
+//     case 0:
+//       return ['0,0', '0,1', '0,2', '1,0', '1,1', '1,2', '2,0', '2,1', '2,2'];
+//     case 1:
+//       return ['0,3', '0,4', '0,5', '1,3', '1,4', '1,5', '2,3', '2,4', '2,5'];
+//     case 2:
+//       return ['0,6', '0,7', '0,8', '1,6', '1,7', '1,8', '2,6', '2,7', '2,8'];
+//     case 3:
+//       return ['3,0', '3,1', '3,2', '4,0', '4,1', '4,2', '5,0', '5,1', '5,2'];
+//     case 4:
+//       return ['3,3', '3,4', '3,5', '4,3', '4,4', '4,5', '5,3', '5,4', '5,5'];
+//     case 5:
+//       return ['3,6', '3,7', '3,8', '4,6', '4,7', '4,8', '5,6', '5,7', '5,8'];
+//     case 6:
+//       return ['6,0', '6,1', '6,2', '7,0', '7,1', '7,2', '8,0', '8,1', '8,2'];
+//     case 7:
+//       return ['6,3', '6,4', '6,5', '7,3', '7,4', '7,5', '8,0', '8,1', '8,2'];
+//     case 8:
+//       return ['6,6', '6,7', '6,8', '7,6', '7,7', '7,8', '8,6', '8,7', '8,8'];
+//     default:
+//       break;
+//   }
+// }
+// function parseSubgridSet(string, i) {
+//   let x = string.charAt(0);
+//   let y = string.charAt(2);
+//   return { x, y };
+// }
+
+// //! I think this is fucked up, but I'm tired now
+// function createSubgridSet(matrix, i) {
+//   let coordinates = findCoordinatesOfSubgrid(i);
+//   let newset = [];
+//   coordinates.forEach((e) => {
+//     let { x, y } = parseSubgridSet(e);
+//     newset.push(matrix[x][y]);
+//   });
+//   return newset;
+// }
 
 function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
   //! Declare variables
@@ -268,84 +556,3 @@ function iterateThroughEmptyCells(matrix, cycles, guesses, emptyCellsCount) {
   console.dir(report);
   return report;
 }
-// console.time('test One');
-// iterateThroughEmptyCells(easy, totalCycles);
-// console.timeEnd('test One');
-
-console.time('test Hard');
-iterateThroughEmptyCells(hard, totalCycles);
-console.timeEnd('test Hard');
-
-
-
-//TODO Delte these if I don't need them, they should be in the classes now
-// function findSubgrid(matrix, x, y) {
-//   if (x < 3 && y < 3) {
-//     return createSubgrid(matrix, 0, 0);
-//   }
-//   if (x < 3 && y < 6) {
-//     return createSubgrid(matrix, 0, 3);
-//   }
-//   if (x < 3 && y < 9) {
-//     return createSubgrid(matrix, 0, 6);
-//   }
-//   if (x < 6 && y < 3) {
-//     return createSubgrid(matrix, 3, 0);
-//   }
-//   if (x < 6 && y < 6) {
-//     return createSubgrid(matrix, 3, 3);
-//   }
-//   if (x < 6 && y < 9) {
-//     return createSubgrid(matrix, 3, 6);
-//   }
-//   if (x < 9 && y < 3) {
-//     return createSubgrid(matrix, 6, 0);
-//   }
-//   if (x < 9 && y < 6) {
-//     return createSubgrid(matrix, 6, 3);
-//   }
-//   if (x < 9 && y < 9) {
-//     return createSubgrid(matrix, 6, 6);
-//   }
-//   return null;
-// }
-// function findCoordinatesOfSubgrid(i) {
-//   switch (i) {
-//     case 0:
-//       return ['0,0', '0,1', '0,2', '1,0', '1,1', '1,2', '2,0', '2,1', '2,2'];
-//     case 1:
-//       return ['0,3', '0,4', '0,5', '1,3', '1,4', '1,5', '2,3', '2,4', '2,5'];
-//     case 2:
-//       return ['0,6', '0,7', '0,8', '1,6', '1,7', '1,8', '2,6', '2,7', '2,8'];
-//     case 3:
-//       return ['3,0', '3,1', '3,2', '4,0', '4,1', '4,2', '5,0', '5,1', '5,2'];
-//     case 4:
-//       return ['3,3', '3,4', '3,5', '4,3', '4,4', '4,5', '5,3', '5,4', '5,5'];
-//     case 5:
-//       return ['3,6', '3,7', '3,8', '4,6', '4,7', '4,8', '5,6', '5,7', '5,8'];
-//     case 6:
-//       return ['6,0', '6,1', '6,2', '7,0', '7,1', '7,2', '8,0', '8,1', '8,2'];
-//     case 7:
-//       return ['6,3', '6,4', '6,5', '7,3', '7,4', '7,5', '8,0', '8,1', '8,2'];
-//     case 8:
-//       return ['6,6', '6,7', '6,8', '7,6', '7,7', '7,8', '8,6', '8,7', '8,8'];
-//     default:
-//       break;
-//   }
-// }
-// function parseSubgridSet(string, i) {
-//   let x = string.charAt(0);
-//   let y = string.charAt(2);
-//   return { x, y };
-// }
-
-// //! I think this is fucked up, but I'm tired now
-// function createSubgridSet(matrix, i) {
-//   let coordinates = findCoordinatesOfSubgrid(i);
-//   let newset = [];
-//   coordinates.forEach((e) => {
-//     let { x, y } = parseSubgridSet(e);
-//     newset.push(matrix[x][y]);
-//   });
-//   return newset;
-// }

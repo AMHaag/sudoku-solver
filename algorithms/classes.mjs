@@ -3,7 +3,7 @@
 export class Board {
   constructor(matrix) {
     this.grid = matrix;
-    this.numeralsAvailable = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    this.numsAvail = new NumbersAvailable();
     this.missingValues = 0;
   }
   returnCell(x, y) {
@@ -151,33 +151,96 @@ export class Board {
       return this.returnSubgridArray(2);
     }
     if (x < 6 && y < 3) {
-      return createSubgrid(3, 0);
+      return this.returnSubgridArray(3);
     }
     if (x < 6 && y < 6) {
-      return createSubgrid(3, 3);
+      return this.returnSubgridArray(4);
     }
     if (x < 6 && y < 9) {
-      return createSubgrid(3, 6);
+      return this.returnSubgridArray(5);
     }
     if (x < 9 && y < 3) {
-      return createSubgrid(6, 0);
+      return this.returnSubgridArray(6);
     }
     if (x < 9 && y < 6) {
-      return createSubgrid(6, 3);
+      return this.returnSubgridArray(7);
     }
     if (x < 9 && y < 9) {
-      return createSubgrid(6, 6);
+      return this.returnSubgridArray(8);
     }
     return null;
   }
   updateCell(input, x, y) {
-    if (typeof input !== Number) {
+    if (!Number.isInteger(input)) {
       throw 'a Board cell can only contain a Number';
     }
-    if (input < 1 || input < 10) {
+    if (input < 1 || input > 10) {
       throw 'a Board cell can must be between 1 and 9';
     }
     this.grid[x][y] = input;
+  }
+  updateCellViaSubgridIndex(g, i, input) {
+    let x, y;
+    if (g === 0 || g === 3 || g === 6) {
+      if (i < 3) {
+        x = g;
+        y = i;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 6) {
+        x = g + 1;
+        y = i - 3;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 9) {
+        x = g + 2;
+        y = i - 6;
+        this.updateCell(input, x, y);
+        return true;
+      }
+    }
+    if (g === 1 || g === 4 || g === 7) {
+      if (i < 3) {
+        x = g - 1;
+        y = i + 3;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 6) {
+        x = g;
+        y = i;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 9) {
+        x = g + 1;
+        y = i - 3;
+        this.updateCell(input, x, y);
+        return true;
+      }
+    }
+    if (g === 2 || g === 5 || g === 8) {
+      if (i < 3) {
+        x = g - 2;
+        y = i + 6;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 6) {
+        x = g - 1;
+        y = i + 3;
+        this.updateCell(input, x, y);
+        return true;
+      }
+      if (i < 9) {
+        x = g;
+        y = i;
+        this.updateCell(input, x, y);
+        return true;
+      }
+    }
   }
 }
 
@@ -360,19 +423,82 @@ export class BoardOfPossibleValues {
       throw `ERROR: ${i} does not exist in cell ${x}${y}`;
     }
   }
-  updateCell(input, x, y) {
-    if (typeof input !== String) {
+  overwriteCell(input, x, y) {
+    if (!typeof input == String) {
       throw 'ERROR: a BoPV cell can only contain a string';
     } else {
       this.grid[x][y] = input;
     }
   }
   updateCellViaArray(arr, x, y) {
-    if (typeof arr !== Array) {
-      throw 'ERROR: this method only takes arrays as input';
+    if (!Array.isArray(arr)) {
+      throw 'ERROR: this method only takes arrays as input (BOPV.updateCellViaArray)';
     }
-    let cell = arr.join('');
-    this.updateCell(cell, x, y);
+    let cell = arr.join(' ');
+    this.overwriteCell(cell, x, y);
+  }
+  updateCellViaSubgridIndex(g, i, input) {
+    let x, y;
+    if (g === 0 || g === 3 || g === 6) {
+      if (i < 3) {
+        x = g;
+        y = i;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 6) {
+        x = g + 1;
+        y = i - 3;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 9) {
+        x = g + 2;
+        y = i - 6;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+    }
+    if (g === 1 || g === 4 || g === 7) {
+      if (i < 3) {
+        x = g - 1;
+        y = i + 3;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 6) {
+        x = g;
+        y = i;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 9) {
+        x = g + 1;
+        y = i - 3;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+    }
+    if (g === 2 || g === 5 || g === 8) {
+      if (i < 3) {
+        x = g - 2;
+        y = i + 6;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 6) {
+        x = g - 1;
+        y = i + 3;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+      if (i < 9) {
+        x = g;
+        y = i;
+        this.overwriteCell(input, x, y);
+        return `${x}${y}`;
+      }
+    }
   }
 }
 
@@ -388,6 +514,7 @@ export class NumbersAvailable {
       n6: 9,
       n7: 9,
       n8: 9,
+      n9: 9,
     };
   }
   /**This Method returns an array of numbers with at least one missing from the board
@@ -430,7 +557,6 @@ export class NumbersAvailable {
   returnNumAvailabilityArray() {
     let arr = [];
     for (const property in this.num) {
-      console.log(property);
       arr.push(this.num[property]);
     }
     return arr;
@@ -536,10 +662,8 @@ export class NumbersAvailable {
         this.num.n9--;
         break;
       default:
-        return this;
     }
 
-    return this;
   }
   /**
    * This method takes an array of numbers and returns whichever has the least remaining on the board
@@ -547,20 +671,27 @@ export class NumbersAvailable {
    * @return Number
    */
   returnLeastAvailableNum(...nums) {
-    let countAvailable = 9;
-    let numLeastAvailable;
-    let x = nums
-    console.log(this)
-    x.forEach((cv,i,arr,this) => {
-      if (this.returnAvailableForNum(cv) <= countAvailable) {
-        countAvailable = this.returnAvailableForNum(cv);
-        numLeastAvailable = cv;
+    let countAvailable = 10;
+    let numLeastAvailable = 0;
+    for (let i = 0; i <= nums.length; i++) {
+      let testAvail = this.returnAvailableForNum(nums[i]);
+      if (testAvail < countAvailable) {
+        countAvailable = testAvail;
+        numLeastAvailable = nums[i];
       }
-    });
-    return numLeastAvailable
+    }
+
+    return numLeastAvailable;
   }
 }
-
-let x = new NumbersAvailable();
-x.decrementNumAvail(1)
-console.log(x.returnLeastAvailableNum([1,2,3]));
+export const emptyStringMatrix = [
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+];
