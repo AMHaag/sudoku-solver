@@ -2,12 +2,17 @@
 
 export class Board {
   constructor(matrix) {
-    this.grid = matrix;
+    const x = matrix.slice(0)
+    this.grid = x;
     this.numsAvail = new NumbersAvailable();
     this.missingValues = 0;
   }
   returnCell(x, y) {
     return this.grid[x][y];
+  }
+  returnBoard() {
+    const copyBoard = Array.from(this.grid)
+    return copyBoard;
   }
   returnRowArray(i) {
     return this.grid[i];
@@ -242,11 +247,75 @@ export class Board {
       }
     }
   }
+  returnCellViaSubgridIndex(g, i) {
+    let x, y;
+    if (g === 0 || g === 3 || g === 6) {
+      if (i < 3) {
+        x = g;
+        y = i;
+        return this.returnCell(x,y);
+      }
+      if (i < 6) {
+        x = g + 1;
+        y = i - 3;
+        return this.returnCell(x,y);
+      }
+      if (i < 9) {
+        x = g + 2;
+        y = i - 6;
+        return this.returnCell(x,y);
+      }
+    }
+    if (g === 1 || g === 4 || g === 7) {
+      if (i < 3) {
+        x = g - 1;
+        y = i + 3;
+        return this.returnCell(x,y);
+      }
+      if (i < 6) {
+        x = g;
+        y = i;
+        return this.returnCell(x,y);
+      }
+      if (i < 9) {
+        x = g + 1;
+        y = i - 3;
+        return this.returnCell(x,y);
+      }
+    }
+    if (g === 2 || g === 5 || g === 8) {
+      if (i < 3) {
+        x = g - 2;
+        y = i + 6;
+        return this.returnCell(x,y);
+      }
+      if (i < 6) {
+        x = g - 1;
+        y = i + 3;
+        return this.returnCell(x,y);
+      }
+      if (i < 9) {
+        x = g;
+        y = i;
+        return this.returnCell(x,y);
+      }
+    }
+  }
 }
 
 export class BoardOfPossibleValues {
-  constructor(matrix) {
-    this.grid = matrix;
+  constructor(matrix = emptyStringMatrix) {
+    this.grid = [
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+  ['', '', '', '', '', '', '', '', ''],
+]
   }
   returnCell(x, y) {
     return this.grid[x][y];
@@ -418,7 +487,7 @@ export class BoardOfPossibleValues {
 
     if (cell.includes(iString)) {
       let newCell = cell.replace(iString, '');
-      this.updateCell(newCell, x, y);
+      this.overwriteCell(newCell, x, y);
     } else {
       throw `ERROR: ${i} does not exist in cell ${x}${y}`;
     }
@@ -427,7 +496,7 @@ export class BoardOfPossibleValues {
     if (!typeof input == String) {
       throw 'ERROR: a BoPV cell can only contain a string';
     } else {
-      this.grid[x][y] = input;
+      this.grid[x][y] = input.trim();
     }
   }
   updateCellViaArray(arr, x, y) {
@@ -663,7 +732,6 @@ export class NumbersAvailable {
         break;
       default:
     }
-
   }
   /**
    * This method takes an array of numbers and returns whichever has the least remaining on the board

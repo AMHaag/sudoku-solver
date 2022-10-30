@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Board } from './classes.mjs';
 const testGrid = [
   [5, 3, 4, 6, 7, 8, 9, 1, 2],
   [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -91,5 +92,68 @@ function checkFullMatrix(matrix) {
 
   return solutionIsValid;
 }
+function checkAllGroupsForDuplicates(matrix) {
+  let testBoard = new Board(matrix);
+  let duplicateFound = false;
+  for (let i = 0; i < 9; i++) {
+    if (duplicateFound) {
+      break;
+    }
+    let testRow = testBoard.returnRowArray(i);
+    let testCol = testBoard.returnColArray(i);
+    let testSub = testBoard.returnSubgridArray(i);
+    testRow = testRow.map((v) => {
+      if (v > 0) {
+        return v;
+      }
+    });
+    testCol = testCol.map((v) => {
+      if (v > 0) {
+        return v;
+      }
+    });
+    testSub = testSub.map((v) => {
+      if (v > 0) {
+        return v;
+      }
+    });
+    let testRowSet = new Set(testRow);
+    let testColSet = new Set(testCol);
+    let testSubSet = new Set(testSub);
+    if (testRow.length !== testRowSet.size) {
+      console.error(`Duplicate value found in row:${i}`);
+      duplicateFound = true;
+      break;
+    }
+    if (testCol.length !== testColSet.size) {
+      console.error(`Duplicate value found in col:${i}`);
+      duplicateFound = true;
+      break;
+    }
+    if (testSub.length !== testSubSet.size) {
+      console.error(`Duplicate value found in sub:${i}`);
+      duplicateFound = true;
+      break;
+    }
+  }
+  return duplicateFound;
+}
+function checkGroupForDuplicate(array) {
+  let duplicateFound = false;
+  let testArr = array;
+  testArr = testArr.filter((v) => {
+    if (v > 0) {
+      return v;
+    }
+  });
+  let testSet = new Set(testArr);
 
-export { createSubgrid, createCol, checkFullMatrix };
+  if (testArr.length !== testSet.size) {
+    duplicateFound = true;
+    testArr.sort();
+    console.error(`Duplicate value found:${testArr}`);
+  }
+  return duplicateFound;
+}
+
+export { createSubgrid, createCol, checkFullMatrix,checkAllGroupsForDuplicates,checkGroupForDuplicate };
