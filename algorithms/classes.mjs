@@ -2,7 +2,7 @@
 
 export class Board {
   constructor(matrix) {
-    const x = matrix.slice(0)
+    const x = matrix.slice(0);
     this.grid = x;
     this.numsAvail = new NumbersAvailable();
     this.missingValues = 0;
@@ -11,7 +11,7 @@ export class Board {
     return this.grid[x][y];
   }
   returnBoard() {
-    const copyBoard = Array.from(this.grid)
+    const copyBoard = Array.from(this.grid);
     return copyBoard;
   }
   returnRowArray(i) {
@@ -253,51 +253,51 @@ export class Board {
       if (i < 3) {
         x = g;
         y = i;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 6) {
         x = g + 1;
         y = i - 3;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 9) {
         x = g + 2;
         y = i - 6;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
     }
     if (g === 1 || g === 4 || g === 7) {
       if (i < 3) {
         x = g - 1;
         y = i + 3;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 6) {
         x = g;
         y = i;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 9) {
         x = g + 1;
         y = i - 3;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
     }
     if (g === 2 || g === 5 || g === 8) {
       if (i < 3) {
         x = g - 2;
         y = i + 6;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 6) {
         x = g - 1;
         y = i + 3;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
       if (i < 9) {
         x = g;
         y = i;
-        return this.returnCell(x,y);
+        return this.returnCell(x, y);
       }
     }
   }
@@ -306,16 +306,16 @@ export class Board {
 export class BoardOfPossibleValues {
   constructor(matrix = emptyStringMatrix) {
     this.grid = [
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-  ['', '', '', '', '', '', '', '', ''],
-]
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', ''],
+    ];
   }
   returnCell(x, y) {
     return this.grid[x][y];
@@ -569,69 +569,81 @@ export class BoardOfPossibleValues {
       }
     }
   }
-  getCellCoordinateViaSubgridIndex(g,i){
-        let x, y;
-        if (g === 0 || g === 3 || g === 6) {
-          if (i < 3) {
-            x = g;
-            y = i;
-            return {x,y};
-          }
-          if (i < 6) {
-            x = g + 1;
-            y = i - 3;
-            return {x,y};
-          }
-          if (i < 9) {
-            x = g + 2;
-            y = i - 6;
-            return {x,y};
-          }
-        }
-        if (g === 1 || g === 4 || g === 7) {
-          if (i < 3) {
-            x = g - 1;
-            y = i + 3;
-            return {x,y};
-          }
-          if (i < 6) {
-            x = g;
-            y = i;
-            return {x,y};
-          }
-          if (i < 9) {
-            x = g + 1;
-            y = i - 3;
-            return {x,y};
-          }
-        }
-        if (g === 2 || g === 5 || g === 8) {
-          if (i < 3) {
-            x = g - 2;
-            y = i + 6;
-            return {x,y};
-          }
-          if (i < 6) {
-            x = g - 1;
-            y = i + 3;
-            return {x,y};
-          }
-          if (i < 9) {
-            x = g;
-            y = i;
-            return {x,y};
-          }
-        }
+  getCellCoordinateViaSubgridIndex(g, i) {
+    let x, y;
+    if (g === 0 || g === 3 || g === 6) {
+      if (i < 3) {
+        x = g;
+        y = i;
+        return { x, y };
+      }
+      if (i < 6) {
+        x = g + 1;
+        y = i - 3;
+        return { x, y };
+      }
+      if (i < 9) {
+        x = g + 2;
+        y = i - 6;
+        return { x, y };
+      }
+    }
+    if (g === 1 || g === 4 || g === 7) {
+      if (i < 3) {
+        x = g - 1;
+        y = i + 3;
+        return { x, y };
+      }
+      if (i < 6) {
+        x = g;
+        y = i;
+        return { x, y };
+      }
+      if (i < 9) {
+        x = g + 1;
+        y = i - 3;
+        return { x, y };
+      }
+    }
+    if (g === 2 || g === 5 || g === 8) {
+      if (i < 3) {
+        x = g - 2;
+        y = i + 6;
+        return { x, y };
+      }
+      if (i < 6) {
+        x = g - 1;
+        y = i + 3;
+        return { x, y };
+      }
+      if (i < 9) {
+        x = g;
+        y = i;
+        return { x, y };
+      }
+    }
   }
-  removeOptionCellsparents(x,y,n){
-    let s = `${n}`
+  removeOptionCellsparents(x, y, n) {
+    let s = `${n}`;
     let parentRow = this.returnRowArray(x);
     let parentCol = this.returnColArray(y);
-    let parentSub = this.returnSubgridArrayByCoordinate(x,y);
+    let parentSub = this.returnSubgridArrayByCoordinate(x, y);      
 
-    parentRow.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
-    parentCol.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
-    parentSub.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
+    parentRow.forEach((cv) => {
+      if (cv.includes(s)) {
+        cv.replace(s, '');
+      }
+    });
+    parentCol.forEach((cv) => {
+      if (cv.includes(s)) {
+        cv.replace(s, '');
+      }
+    });
+    parentSub.forEach((cv) => {
+      if (cv.includes(s)) {
+        cv.replace(s, '');
+      }
+    });
   }
 }
 
