@@ -569,6 +569,70 @@ export class BoardOfPossibleValues {
       }
     }
   }
+  getCellCoordinateViaSubgridIndex(g,i){
+        let x, y;
+        if (g === 0 || g === 3 || g === 6) {
+          if (i < 3) {
+            x = g;
+            y = i;
+            return {x,y};
+          }
+          if (i < 6) {
+            x = g + 1;
+            y = i - 3;
+            return {x,y};
+          }
+          if (i < 9) {
+            x = g + 2;
+            y = i - 6;
+            return {x,y};
+          }
+        }
+        if (g === 1 || g === 4 || g === 7) {
+          if (i < 3) {
+            x = g - 1;
+            y = i + 3;
+            return {x,y};
+          }
+          if (i < 6) {
+            x = g;
+            y = i;
+            return {x,y};
+          }
+          if (i < 9) {
+            x = g + 1;
+            y = i - 3;
+            return {x,y};
+          }
+        }
+        if (g === 2 || g === 5 || g === 8) {
+          if (i < 3) {
+            x = g - 2;
+            y = i + 6;
+            return {x,y};
+          }
+          if (i < 6) {
+            x = g - 1;
+            y = i + 3;
+            return {x,y};
+          }
+          if (i < 9) {
+            x = g;
+            y = i;
+            return {x,y};
+          }
+        }
+  }
+  removeOptionCellsparents(x,y,n){
+    let s = `${n}`
+    let parentRow = this.returnRowArray(x);
+    let parentCol = this.returnColArray(y);
+    let parentSub = this.returnSubgridArrayByCoordinate(x,y);
+
+    parentRow.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
+    parentCol.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
+    parentSub.forEach((cv)=>{if(cv.includes(s)){cv.replace(s,'')}});
+  }
 }
 
 export class NumbersAvailable {

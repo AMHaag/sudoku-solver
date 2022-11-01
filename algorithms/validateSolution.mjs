@@ -155,5 +155,19 @@ function checkGroupForDuplicate(array) {
   }
   return duplicateFound;
 }
+function checkCellForConflicts(x,y,board){
+  let rowConflicts = checkGroupForDuplicate(board.returnRowArray(x))
+  let colConflicts = checkGroupForDuplicate(board.returnColArray(y))
+  let subConflicts = checkGroupForDuplicate(board.returnSubgridArrayByCoordinate(x,y))
+  if(rowConflicts && colConflicts && subConflicts){return true}
+  return false;
+}
 
-export { createSubgrid, createCol, checkFullMatrix,checkAllGroupsForDuplicates,checkGroupForDuplicate };
+export {
+  createSubgrid,
+  createCol,
+  checkFullMatrix,
+  checkAllGroupsForDuplicates,
+  checkGroupForDuplicate,
+  checkCellForConflicts,
+};

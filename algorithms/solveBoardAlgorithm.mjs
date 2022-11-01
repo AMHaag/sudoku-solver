@@ -1,12 +1,12 @@
 'use strict';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  checkFullMatrix,checkGroupForDuplicate
+  checkFullMatrix,
+  checkGroupForDuplicate,
+  checkCellForConflicts,
 } from './validateSolution.mjs';
 import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
-import {
-  testCases
-} from './testCases.mjs';
+import { testCases } from './testCases.mjs';
 Object.freeze(testCases);
 
 function generateEmptyBoPV() {
@@ -15,10 +15,10 @@ function generateEmptyBoPV() {
 }
 
 function findFirstSolution(matrix, guesses = 0, cycles = 0) {
-  let showDetailsInConsole = false;
+  //* Set runtime behaviors *//
+  let showDetailsInConsole = true;
   //* =====function's variables===== *//
-  let x = matrix.slice(0);
-  let board = new Board(x);
+  let board = new Board(matrix.slice(0));
   /** Board of Possible Values */
   let BoPV = new BoardOfPossibleValues();
   let guessDepth = guesses;
@@ -28,7 +28,6 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
     solution: false,
     returnBoard: null,
     iterations: null,
-    maxGuessDepth: guessDepth,
   };
   //* =====Subfunctions===== *//
   function iterateCellsAndGroups() {
@@ -42,7 +41,9 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
     );
     // console.table(board.grid);
     function iterateCells() {
-      if(solutionImpossible){return}
+      if (solutionImpossible) {
+        return;
+      }
       board.missingValues = 0;
       for (let x = 0; x < 9; x++) {
         for (let y = 0; y < 9; y++) {
@@ -114,7 +115,9 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
       }
     }
     function iterateGroups() {
-      if(solutionImpossible){return}
+      if (solutionImpossible) {
+        return;
+      }
       let a = board.numsAvail.returnArrayOfAvailableNums();
       a.forEach((cv) => {
         let n = cv;
@@ -149,7 +152,8 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
                 throw 'ERROR: CELL ALREADY FULL :row';
               }
               board.grid[g][indexOfN] = n;
-              
+              BoPV.remove
+
               BoPV.overwriteCell('', g, indexOfN);
               valuesFound++;
               board.numsAvail.decrementNumAvail(n);
@@ -159,11 +163,13 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
                 console.log(
                   `Cell: ${g}${indexOfN} assigned value ${n} via row g.e. I:${cycleCount} G:${guessDepth}`
                 );
+                console.log(BoPV.returnRowArray(g));
               }
               if (checkGroupForDuplicate(board.returnRowArray(g))) {
-                console.table(board.grid)
+                console.table(board.grid);
                 console.error(`This cannot be assigned, causes duplicate!`);
-                throw 'fuck'
+                solutionImpossible = true;
+                break;
               }
               continue;
             }
@@ -192,6 +198,10 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               if (board.grid[indexOfN][g] !== 0) {
                 throw 'ERROR: CELL ALREADY FULL :col';
               }
+              if (checkCellForConflicts(indexOfN, g, board)) {
+                solutionImpossible = true;
+                break;
+              }
               board.updateCell(n, indexOfN, g);
               BoPV.overwriteCell('', indexOfN, g);
               valuesFound++;
@@ -202,11 +212,12 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
                 console.log(
                   `Cell: ${indexOfN}${g} assigned value${n} via col g.e. I:${cycleCount} G:${guessDepth}`
                 );
+                console.log(BoPV.returnColArray(g));
               }
               if (checkGroupForDuplicate(board.returnColArray(g))) {
-                console.table(board.grid)
+                console.table(board.grid);
                 console.error(`This cannot be assigned, causes duplicate!`);
-                throw 'fuck';
+                solutionImpossible = true;
               }
               continue;
             }
@@ -231,8 +242,12 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               }
             });
             if (cellsThatCanContainN == 1) {
-              if(board.returnCellViaSubgridIndex(g,indexOfN)!==0){
+              if (board.returnCellViaSubgridIndex(g, indexOfN) !== 0) {
                 throw 'ERROR: CELL ALREADY FULL :sub';
+              }
+              let { x, y } = BoPV.getCellCoordinateViaSubgridIndex(g, indexOfN);
+              if (checkCellForConflicts(x, y, board)) {
+                solutionImpossible = true;
               }
               board.updateCellViaSubgridIndex(g, indexOfN, n);
               let xy = BoPV.updateCellViaSubgridIndex(g, indexOfN, '');
@@ -244,11 +259,12 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
                 console.log(
                   `Cell: ${xy} assigned value ${n} via sub g.e. I:${cycleCount} G:${guessDepth}`
                 );
+                console.log(BoPV.returnSubgridArray(g));
               }
               if (checkGroupForDuplicate(board.returnSubgridArray(g))) {
-                console.table(board.grid)
                 console.error(`This cannot be assigned, causes duplicate!`);
-                throw 'fuck';
+                solutionImpossible = true;
+                break;
               }
             }
           }
@@ -268,13 +284,19 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
     }
   }
   function makeGuess() {
-    if(solutionImpossible){return}
+    if (solutionImpossible) {
+      return;
+    }
     guessDepth++;
     let end = false;
     for (let x = 0; x < 9; x++) {
-      if(end){break}
+      if (end) {
+        break;
+      }
       for (let y = 0; y < 9; y++) {
-        if(end){break}
+        if (end) {
+          break;
+        }
         let cell = BoPV.returnCell(x, y);
         let cellArrStr = cell.split(' ');
         let cellArr = cellArrStr.map((v) => {
@@ -282,38 +304,53 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
         });
         if (cellArr.length > 1) {
           for (let i = 0; i < cellArr.length; i++) {
-            if(end){break}
+            if (end) {
+              break;
+            }
             // console.log(typeof cellArr[i]);
             // console.log(BoPV.grid[x][y]);
             // console.table(BoPV.grid);
-            if(showDetailsInConsole){console.log(`Does ${x}${y} = ${cellArr[i]}`);}
+            if (showDetailsInConsole) {
+              console.log(`Does ${x}${y} = ${cellArr[i]}`);
+            }
             const theoryBoard = board.returnBoard();
             let testValue = cellArr[i];
             theoryBoard[x][y] = testValue;
             BoPV.removeOptionFromCell(cellArr[i], x, y);
-            if(showDetailsInConsole){console.table(theoryBoard);}
-            report =
-              findFirstSolution(theoryBoard, guessDepth, cycleCount);
+            if (showDetailsInConsole) {
+              console.table(theoryBoard);
+            }
+            report = findFirstSolution(theoryBoard, guessDepth, cycleCount);
             if (report.solution) {
               end = true;
-              guessDepth=report.maxGuessDepth
-              if(showDetailsInConsole){console.log(`${x}${y} = ${cellArr[i]}`);}
+              if (showDetailsInConsole) {
+                console.log(`${x}${y} = ${cellArr[i]}`);
+              }
               // console.log(`Solution found in guess #${guessDepth}`);
               board = new Board(report.returnBoard);
               cycleCount = report.iterations;
               report.solution = true;
               break;
             }
-            if(end){break}
+            if (end) {
+              break;
+            }
             if (!report.solution) {
-              if(end){break}
+              if (end) {
+                break;
+              }
               console.log(`${x}${y} =/= ${cellArr[i]}`);
               continue;
             }
           }
-          if(end){break}
+          if (end) {
+            break;
+          }
         }
-      }if(end){break}
+      }
+      if (end) {
+        break;
+      }
     }
     return;
   }
@@ -331,8 +368,8 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
         console.table(board.grid);
         return report;
       } else {
-        console.table(board.grid);
-        throw 'illegal board reached';
+        report.solution = false;
+        return report;
       }
     }
   }
@@ -341,7 +378,7 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
   iterateCellsAndGroups();
   if (solutionImpossible) {
     console.log('Branch end');
-    report.solution=false
+    report.solution = false;
     return report;
   }
   checkForFinishedBoard();
@@ -353,5 +390,5 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
 }
 
 console.time('Time to Solve');
-findFirstSolution(testCases.extreme1);
+findFirstSolution(testCases.extreme3);
 console.timeEnd('Time to Solve');
