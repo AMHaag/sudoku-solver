@@ -11,7 +11,7 @@ export class Board {
     return this.grid[x][y];
   }
   returnBoard() {
-    const copyBoard = Array.from(this.grid);
+    const copyBoard = this.grid.slice();
     return copyBoard;
   }
   returnRowArray(i) {
@@ -301,6 +301,28 @@ export class Board {
       }
     }
   }
+  returnSetOfConflicts(x, y) {
+    let row = this.returnRowArray(x);
+    let col = this.returnColArray(y);
+    let sub = this.returnSubgridArrayByCoordinate(x, y);
+    let concat = row.concat(col, sub);
+    let conflictSet = new Set(concat);
+    if (conflictSet.has(0)) {
+      conflictSet.delete(0);
+    }
+    let returnArr = Array.from(conflictSet);
+    // console.log(`Cell: ${x}${y} has ${returnArr.length} conflicts ${returnArr}`)
+    return returnArr;
+  }
+  countMissingValues(){
+    for(let x=0;x<9;x++){
+      for(let y=0;y<9;y++){
+        if(!this.grid[x][y]){
+          this.missingValues++
+        }
+      }
+    }
+  }
 }
 
 export class BoardOfPossibleValues {
@@ -462,22 +484,22 @@ export class BoardOfPossibleValues {
       return this.returnSubgridArray(2);
     }
     if (x < 6 && y < 3) {
-      return createSubgrid(3, 0);
+      return this.returnSubgridArray(3);
     }
     if (x < 6 && y < 6) {
-      return createSubgrid(3, 3);
+      return this.returnSubgridArray(4);
     }
     if (x < 6 && y < 9) {
-      return createSubgrid(3, 6);
+      return this.returnSubgridArray(5);
     }
     if (x < 9 && y < 3) {
-      return createSubgrid(6, 0);
+      return this.returnSubgridArray(6);
     }
     if (x < 9 && y < 6) {
-      return createSubgrid(6, 3);
+      return this.returnSubgridArray(7);
     }
     if (x < 9 && y < 9) {
-      return createSubgrid(6, 6);
+      return this.returnSubgridArray(8);
     }
     return null;
   }
@@ -627,7 +649,7 @@ export class BoardOfPossibleValues {
     let s = `${n}`;
     let parentRow = this.returnRowArray(x);
     let parentCol = this.returnColArray(y);
-    let parentSub = this.returnSubgridArrayByCoordinate(x, y);      
+    let parentSub = this.returnSubgridArrayByCoordinate(x, y);
 
     parentRow.forEach((cv) => {
       if (cv.includes(s)) {
@@ -644,6 +666,23 @@ export class BoardOfPossibleValues {
         cv.replace(s, '');
       }
     });
+  }
+  returnQueueOfGuessCandidates(){
+    let queue =[];
+    for(let x=0;x<9;x++){
+      for (let y=0;y<9;y++){
+        if(!this.grid[x][y].length){continue}
+        let s = this.grid[x][y]
+        let t = s.split(' ')
+        queue.push({x:x,y:y,p:s,c:t.length})
+
+      }
+    }
+    function compare(a,b){
+      return a.c-b.c
+    }
+    queue.sort(compare)
+    return queue;
   }
 }
 

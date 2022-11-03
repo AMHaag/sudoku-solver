@@ -4,85 +4,80 @@ import {
   checkFullMatrix,
   checkGroupForDuplicate,
   checkCellForConflicts,
+  checkAllGroupsForDuplicates,
 } from './validateSolution.mjs';
 import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
 import { testCases } from './testCases.mjs';
+import fs from 'fs';
 Object.freeze(testCases);
 
-function generateEmptyBoPV() {
-  const x = emptyStringMatrix.slice(0);
-  return x;
-}
+let defaultReport = {
+  solution: false,
+  returnBoard: null,
+  iterations: 0,
+  maxGuessDepth: 0,
+};
 
-function findFirstSolution(matrix, guesses = 0, cycles = 0) {
-  //* Set runtime behaviors *//
-  let showDetailsInConsole = true;
+function findFirstSolution(
+  matrix,
+  guesses = 0,
+  incomingReport = defaultReport
+) {
+  //* ======Set runtime behaviors===== *//
+  let showDetailsInConsole = false;
   //* =====function's variables===== *//
-  let board = new Board(matrix.slice(0));
-  /** Board of Possible Values */
+  let board = new Board(Array.from(matrix));
   let BoPV = new BoardOfPossibleValues();
+  let report = incomingReport;
   let guessDepth = guesses;
-  let cycleCount = cycles;
-  let solutionImpossible = false;
-  let report = {
-    solution: false,
-    returnBoard: null,
-    iterations: null,
-  };
+  let noSolution = false;
+
+  //! debugger stop
+  if (report.iterations > 500) {
+    throw `1k iterations reached`;
+  }
   //* =====Subfunctions===== *//
   function iterateCellsAndGroups() {
     let valuesFound = 0;
     let failCell = '';
-    cycleCount++;
+    report.iterations++;
     console.log(
-      `*** Iterations: ${cycleCount}, Guesses: ${guessDepth}, Missing Values: ${
+      `*** Iterations: ${
+        report.iterations
+      }, Guesses: ${guessDepth}, Missing Values: ${
         board.missingValues || 'n/a'
       }`
     );
-    // console.table(board.grid);
     function iterateCells() {
-      if (solutionImpossible) {
+      if (noSolution) {
         return;
       }
       board.missingValues = 0;
       for (let x = 0; x < 9; x++) {
         for (let y = 0; y < 9; y++) {
-          if (cycleCount === 1 && board.grid[x][y] > 0) {
+          if (report.iterations === 1 && board.grid[x][y] > 0) {
             let n = board.grid[x][y];
             board.numsAvail.decrementNumAvail(n);
             if (showDetailsInConsole) {
               console.log(
-                `Cell: ${x}${y} is ${n} I:${cycleCount} G:${guessDepth}`
+                `Cell: ${x}${y} is ${n} I:${report.iterations} G:${guessDepth}`
               );
             }
           }
           if (!board.grid[x][y]) {
             board.missingValues++;
             let options = new Set(board.numsAvail.returnArrayOfAvailableNums());
-            let row = board.returnRowArray(x);
-            let col = board.returnColArray(y);
-            let subgrid = board.returnSubgridArrayByCoordinate(x, y);
-            row.forEach((e) => {
-              if (options.has(e)) {
-                options.delete(e);
-              }
-            });
-            col.forEach((e) => {
-              if (options.has(e)) {
-                options.delete(e);
-              }
-            });
-            subgrid.forEach((e) => {
+            let conflicts = board.returnSetOfConflicts(x, y);
+            conflicts.forEach((e) => {
               if (options.has(e)) {
                 options.delete(e);
               }
             });
             let cellOptions = Array.from(options);
-
             if (options.size === 0) {
               failCell = `${x}${y}`;
-              solutionImpossible = true;
-              console.error(`cell:${failCell} has no possible answers`);
+              noSolution = true;
+              // console.error(`cell:${failCell} has no possible answers`);
               break;
             }
             if (options.size === 1) {
@@ -95,7 +90,7 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               BoPV.overwriteCell('', x, y);
               if (showDetailsInConsole) {
                 console.log(
-                  `Cell: ${x}${y} assigned value ${answer} I:${cycleCount} G:${guessDepth}`
+                  `Cell: ${x}${y} assigned value ${answer} I:${report.iterations} G:${guessDepth}`
                 );
               }
             }
@@ -109,13 +104,13 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
             }
           }
         }
-        if (solutionImpossible) {
+        if (noSolution) {
           break;
         }
       }
     }
     function iterateGroups() {
-      if (solutionImpossible) {
+      if (noSolution) {
         return;
       }
       let a = board.numsAvail.returnArrayOfAvailableNums();
@@ -151,8 +146,14 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               if (board.grid[g][indexOfN] !== 0) {
                 throw 'ERROR: CELL ALREADY FULL :row';
               }
+              if (board.returnSetOfConflicts(g, indexOfN).includes(n)) {
+                if (showDetailsInConsole) {
+                  console.error(`cannot assign ${n} to cell: ${g}${indexOfN}`);
+                }
+                continue;
+              }
               board.grid[g][indexOfN] = n;
-              BoPV.remove
+              BoPV.removeOptionCellsparents(g, indexOfN, n);
 
               BoPV.overwriteCell('', g, indexOfN);
               valuesFound++;
@@ -161,14 +162,13 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               groupVF++;
               if (showDetailsInConsole) {
                 console.log(
-                  `Cell: ${g}${indexOfN} assigned value ${n} via row g.e. I:${cycleCount} G:${guessDepth}`
+                  `Cell: ${g}${indexOfN} assigned value ${n} via row g.e. I:${report.iterations} G:${guessDepth}`
                 );
-                console.log(BoPV.returnRowArray(g));
               }
               if (checkGroupForDuplicate(board.returnRowArray(g))) {
                 console.table(board.grid);
                 console.error(`This cannot be assigned, causes duplicate!`);
-                solutionImpossible = true;
+                noSolution = true;
                 break;
               }
               continue;
@@ -198,11 +198,18 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               if (board.grid[indexOfN][g] !== 0) {
                 throw 'ERROR: CELL ALREADY FULL :col';
               }
+              if (board.returnSetOfConflicts(indexOfN, g).includes(n)) {
+                if (showDetailsInConsole) {
+                  console.error(`cannot assign ${n} to cell: ${g}${indexOfN}`);
+                }
+                continue;
+              }
               if (checkCellForConflicts(indexOfN, g, board)) {
-                solutionImpossible = true;
+                noSolution = true;
                 break;
               }
               board.updateCell(n, indexOfN, g);
+              BoPV.removeOptionCellsparents(indexOfN, g, n);
               BoPV.overwriteCell('', indexOfN, g);
               valuesFound++;
               board.numsAvail.decrementNumAvail(n);
@@ -210,14 +217,14 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
               groupVF++;
               if (showDetailsInConsole) {
                 console.log(
-                  `Cell: ${indexOfN}${g} assigned value${n} via col g.e. I:${cycleCount} G:${guessDepth}`
+                  `Cell: ${indexOfN}${g} assigned value${n} via col g.e. I:${report.iterations} G:${guessDepth}`
                 );
                 console.log(BoPV.returnColArray(g));
               }
               if (checkGroupForDuplicate(board.returnColArray(g))) {
                 console.table(board.grid);
                 console.error(`This cannot be assigned, causes duplicate!`);
-                solutionImpossible = true;
+                noSolution = true;
               }
               continue;
             }
@@ -246,24 +253,31 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
                 throw 'ERROR: CELL ALREADY FULL :sub';
               }
               let { x, y } = BoPV.getCellCoordinateViaSubgridIndex(g, indexOfN);
+              if (board.returnSetOfConflicts(x, y).includes(n)) {
+                if (showDetailsInConsole) {
+                  console.error(`cannot assign ${n} to cell: ${x}${y}`);
+                }
+                continue;
+              }
               if (checkCellForConflicts(x, y, board)) {
-                solutionImpossible = true;
+                noSolution = true;
               }
               board.updateCellViaSubgridIndex(g, indexOfN, n);
+              BoPV.removeOptionCellsparents(x, y, n);
               let xy = BoPV.updateCellViaSubgridIndex(g, indexOfN, '');
-              BoPV.updateCellViaSubgridIndex(g, indexOfN, n.toString());
+              BoPV.overwriteCell('', x, y);
               valuesFound++;
               board.numsAvail.decrementNumAvail(n);
               board.missingValue--;
               if (showDetailsInConsole) {
                 console.log(
-                  `Cell: ${xy} assigned value ${n} via sub g.e. I:${cycleCount} G:${guessDepth}`
+                  `Cell: ${xy} assigned value ${n} via sub g.e. I:${report.iterations} G:${guessDepth}`
                 );
-                console.log(BoPV.returnSubgridArray(g));
+                // console.log(BoPV.returnSubgridArray(g));
               }
               if (checkGroupForDuplicate(board.returnSubgridArray(g))) {
                 console.error(`This cannot be assigned, causes duplicate!`);
-                solutionImpossible = true;
+                noSolution = true;
                 break;
               }
             }
@@ -272,7 +286,7 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
       });
     }
     iterateCells();
-    if (solutionImpossible) {
+    if (noSolution) {
       return false;
     }
     if (board.missingValues > 0) {
@@ -284,74 +298,151 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
     }
   }
   function makeGuess() {
-    if (solutionImpossible) {
+    if (checkAllGroupsForDuplicates(board.grid)) {
+      console.table(board.grid);
+      throw 'something is wrong';
+    }
+    if (noSolution) {
       return;
     }
+
     guessDepth++;
+    if (guessDepth > report.maxGuessDepth) {
+      report.maxGuessDepth = guessDepth;
+    }
     let end = false;
-    for (let x = 0; x < 9; x++) {
-      if (end) {
-        break;
-      }
-      for (let y = 0; y < 9; y++) {
+    let guessQueue = BoPV.returnQueueOfGuessCandidates();
+    for (let q = 0; q < guessQueue.length; q++) {
+      let x = guessQueue[q].x;
+      let y = guessQueue[q].y;
+      let p = guessQueue[q].p.split(' ').map((cv) => {
+        return Number.parseInt(cv);
+      });
+      for (let i = 0; i < p.length; i++) {
         if (end) {
           break;
         }
-        let cell = BoPV.returnCell(x, y);
-        let cellArrStr = cell.split(' ');
-        let cellArr = cellArrStr.map((v) => {
-          return Number.parseInt(v);
-        });
-        if (cellArr.length > 1) {
-          for (let i = 0; i < cellArr.length; i++) {
-            if (end) {
-              break;
-            }
-            // console.log(typeof cellArr[i]);
-            // console.log(BoPV.grid[x][y]);
-            // console.table(BoPV.grid);
-            if (showDetailsInConsole) {
-              console.log(`Does ${x}${y} = ${cellArr[i]}`);
-            }
-            const theoryBoard = board.returnBoard();
-            let testValue = cellArr[i];
-            theoryBoard[x][y] = testValue;
-            BoPV.removeOptionFromCell(cellArr[i], x, y);
-            if (showDetailsInConsole) {
-              console.table(theoryBoard);
-            }
-            report = findFirstSolution(theoryBoard, guessDepth, cycleCount);
-            if (report.solution) {
-              end = true;
-              if (showDetailsInConsole) {
-                console.log(`${x}${y} = ${cellArr[i]}`);
-              }
-              // console.log(`Solution found in guess #${guessDepth}`);
-              board = new Board(report.returnBoard);
-              cycleCount = report.iterations;
-              report.solution = true;
-              break;
-            }
-            if (end) {
-              break;
-            }
-            if (!report.solution) {
-              if (end) {
-                break;
-              }
-              console.log(`${x}${y} =/= ${cellArr[i]}`);
-              continue;
-            }
+
+        if (showDetailsInConsole) {
+          console.log(
+            `Does ${x}${y} = ${p[i]}, it has ${BoPV.grid[x][y]} as options`
+          );
+        }
+
+        let theoryBoard = structuredClone(board);
+        let testValue = p[i];
+        theoryBoard.grid[x][y] = testValue;
+        BoPV.removeOptionFromCell(p[i], x, y);
+        if (showDetailsInConsole) {
+          console.table(theoryBoard.grid);
+        }
+        let outgoingReport = structuredClone(report);
+        report = findFirstSolution(
+          theoryBoard.grid,
+          guessDepth,
+          outgoingReport
+        );
+        theoryBoard.grid = null;
+        if (report.solution) {
+          end = true;
+          if (showDetailsInConsole) {
+            console.log(`${x}${y} = ${p[i]}`);
           }
+          board = new Board(report.returnBoard);
+          report.solution = true;
+          break;
+        }
+        if (end) {
+          break;
+        }
+        if (!report.solution) {
           if (end) {
             break;
           }
+          if (showDetailsInConsole) {
+            console.log(`${x}${y} =/= ${p[i]}`);
+          }
+
+          if (checkAllGroupsForDuplicates(board.grid)) {
+            console.table(board.grid);
+            throw 'something is wrong';
+          }
+          continue;
         }
       }
-      if (end) {
-        break;
-      }
     }
+    // for (let x = 0; x < 9; x++) {
+    //   if (end) {
+    //     break;
+    //   }
+    //   for (let y = 0; y < 9; y++) {
+    //     if (end) {
+    //       break;
+    //     }
+    //     let cell = BoPV.returnCell(x, y);
+    //     let cellArrStr = cell.split(' ');
+    //     let cellArr = cellArrStr.map((v) => {
+    //       return Number.parseInt(v);
+    //     });
+    //     if (cellArr.length > 1) {
+    //       for (let i = 0; i < cellArr.length; i++) {
+    //         if (end) {
+    //           break;
+    //         }
+
+    //         //! change this back to showDetailsInConsole
+    //         if (true) {
+    //           console.log(`Does ${x}${y} = ${cellArr[i]}, it has ${BoPV.grid[x][y]} as options`);
+    //         }
+
+    //         let theoryBoard = structuredClone(board);
+    //         let testValue = cellArr[i];
+    //         theoryBoard.grid[x][y] = testValue;
+    //         BoPV.removeOptionFromCell(cellArr[i], x, y);
+    //         if (showDetailsInConsole) {
+    //           console.table(theoryBoard.grid);
+    //         }
+    //         let outgoingReport = structuredClone(report)
+    //         report = findFirstSolution(
+    //           theoryBoard.grid,
+    //           guessDepth,
+    //           outgoingReport
+    //         );
+    //         theoryBoard.grid = null;
+    //         if (report.solution) {
+    //           end = true;
+    //           if (showDetailsInConsole) {
+    //             console.log(`${x}${y} = ${cellArr[i]}`);
+    //           }
+    //           // console.log(`Solution found in guess #${guessDepth}`);
+    //           board = new Board(report.returnBoard);
+    //           report.solution = true;
+    //           break;
+    //         }
+    //         if (end) {
+    //           break;
+    //         }
+    //         if (!report.solution) {
+    //           if (end) {
+    //             break;
+    //           }
+    //           console.log(`${x}${y} =/= ${cellArr[i]}`);
+    //           if (checkAllGroupsForDuplicates(board.grid)) {
+    //             console.table(board.grid);
+    //             throw 'something is wrong';
+    //           }
+    //           continue;
+    //         }
+    //       }
+    //       if (end) {
+    //         break;
+    //       }
+    //     }
+    //   }
+    //   if (end) {
+    //     break;
+    //   }
+    // }
     return;
   }
   function checkForFinishedBoard() {
@@ -364,19 +455,21 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
       if (solved) {
         report.solution = true;
         report.returnBoard = board.grid;
-        report.iterations = cycleCount;
         console.table(board.grid);
         return report;
       } else {
-        report.solution = false;
-        return report;
+        // report.solution = false;
+        // return report;
+        console.table(board.grid);
+        throw 'Illegal Board Reached';
       }
     }
   }
 
   //* =====Control Flow===== *//
+  board.countMissingValues();
   iterateCellsAndGroups();
-  if (solutionImpossible) {
+  if (noSolution) {
     console.log('Branch end');
     report.solution = false;
     return report;
@@ -389,6 +482,18 @@ function findFirstSolution(matrix, guesses = 0, cycles = 0) {
   return report;
 }
 
-console.time('Time to Solve');
+console.time('Test #1');
+findFirstSolution(testCases.extreme1);
+console.timeEnd('Test #1');
+
+console.time('Test #2');
+findFirstSolution(testCases.extreme2);
+console.timeEnd('Test #2');
+
+console.time('Test #3');
 findFirstSolution(testCases.extreme3);
-console.timeEnd('Time to Solve');
+console.timeEnd('Test #3');
+
+console.time('Test #4');
+findFirstSolution(testCases.extreme4);
+console.timeEnd('Test #4');

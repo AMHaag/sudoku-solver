@@ -102,26 +102,16 @@ function checkAllGroupsForDuplicates(matrix) {
     let testRow = testBoard.returnRowArray(i);
     let testCol = testBoard.returnColArray(i);
     let testSub = testBoard.returnSubgridArray(i);
-    testRow = testRow.map((v) => {
-      if (v > 0) {
-        return v;
-      }
-    });
-    testCol = testCol.map((v) => {
-      if (v > 0) {
-        return v;
-      }
-    });
-    testSub = testSub.map((v) => {
-      if (v > 0) {
-        return v;
-      }
-    });
+    testRow = testRow.filter((cv)=>{if(cv>0){return cv}})
+    testCol = testCol.filter((cv)=>{if(cv>0){return cv}})
+    testSub = testSub.filter((cv)=>{if(cv>0){return cv}})
+  
     let testRowSet = new Set(testRow);
     let testColSet = new Set(testCol);
     let testSubSet = new Set(testSub);
     if (testRow.length !== testRowSet.size) {
       console.error(`Duplicate value found in row:${i}`);
+      console.error(`Set:${testRowSet} Post Map Array: ${testRow}`)
       duplicateFound = true;
       break;
     }
