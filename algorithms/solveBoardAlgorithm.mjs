@@ -8,7 +8,7 @@ import {
 } from './validateSolution.mjs';
 import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
 import { testCases } from './testCases.mjs';
-import fs from 'fs';
+
 Object.freeze(testCases);
 
 let defaultReport = {
@@ -18,7 +18,7 @@ let defaultReport = {
   maxGuessDepth: 0,
 };
 
-function findFirstSolution(
+export default function findFirstSolution(
   matrix,
   guesses = 0,
   incomingReport = defaultReport
@@ -33,7 +33,7 @@ function findFirstSolution(
   let noSolution = false;
 
   //! debugger stop
-  if (report.iterations > 500) {
+  if (report.iterations > 1000) {
     throw `1k iterations reached`;
   }
   //* =====Subfunctions===== *//
@@ -482,18 +482,18 @@ function findFirstSolution(
   return report;
 }
 
-console.time('Test #1');
-findFirstSolution(testCases.extreme1);
-console.timeEnd('Test #1');
+// console.time('Test #1');
+// findFirstSolution(testCases.extreme1);
+// console.timeEnd('Test #1');
 
-console.time('Test #2');
-findFirstSolution(testCases.extreme2);
-console.timeEnd('Test #2');
+// console.time('Test #2');
+// findFirstSolution(testCases.extreme2);
+// console.timeEnd('Test #2');
 
-console.time('Test #3');
-findFirstSolution(testCases.extreme3);
-console.timeEnd('Test #3');
+// console.time('Test #3');
+// findFirstSolution(testCases.extreme3);
+// console.timeEnd('Test #3');
 
-console.time('Test #4');
-findFirstSolution(testCases.extreme4);
-console.timeEnd('Test #4');
+// console.time('Test #4');
+// findFirstSolution(testCases.extreme4);
+// console.timeEnd('Test #4');
