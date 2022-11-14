@@ -1,17 +1,28 @@
 'use strict';
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import fetchPuzzle from './borrowPuzzle.mjs';
 import {
   checkFullMatrix,
   checkGroupForDuplicate,
   checkCellForConflicts,
   checkAllGroupsForDuplicates,
 } from './validateSolution.mjs';
-import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
-import { testCases } from './testCases.mjs';
+import { Board, BoardOfPossibleValues } from './classes.mjs';
+import { appendFileSync } from 'node:fs';
+import failedTries from './failedTries.mjs';
 
-Object.freeze(testCases);
 
+function appendFile(text) {
+  try {
+    appendFileSync('./algorithms/detailedLog.txt', `${text}\n`);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function returnBoardAsString(matrix){
+    const str = `${matrix[0]}\n${matrix[1]}\n${matrix[2]}\n${matrix[3]}\n${matrix[4]}\n${matrix[5]}\n${matrix[6]}\n${matrix[7]}\n${matrix[8]}\n`;
+    return str;
+}
 let defaultReport = {
   solution: false,
   returnBoard: null,
@@ -19,13 +30,12 @@ let defaultReport = {
   maxGuessDepth: 0,
 };
 
-export default function findFirstSolution(
+export default function ffsLogVersion(
   matrix,
   guesses = 0,
   incomingReport = defaultReport
 ) {
-  //* ======Set runtime behaviors===== *//
-  let showDetailsInConsole = false;
+
   //* =====function's variables===== *//
   let board = new Board(Array.from(matrix));
   let BoPV = new BoardOfPossibleValues();
@@ -33,23 +43,14 @@ export default function findFirstSolution(
   let guessDepth = guesses;
   let noSolution = false;
 
-  // optional debugger stop
-  if (report.iterations > 200_000) {
-    return report
-  }
   //* =====Subfunctions===== *//
   function iterateCellsAndGroups() {
     let valuesFound = 0;
     let failCell = '';
     report.iterations++;
-    //! Uncomment later
-    // console.log(
-    //   `*** Iterations: ${
-    //     report.iterations
-    //   }, Guesses: ${guessDepth}, Missing Values: ${
-    //     board.missingValues || 'n/a'
-    //   }`
-    // );
+
+    appendFile(
+      `*** Iterations: ${report.iterations}, Guesses: ${guessDepth}, Missing Values: ${board.missingValues || 'n/a'}`);
     function iterateCells() {
       if (noSolution) {
         return;
@@ -60,11 +61,11 @@ export default function findFirstSolution(
           if (report.iterations === 1 && board.grid[x][y] > 0) {
             let n = board.grid[x][y];
             board.numsAvail.decrementNumAvail(n);
-            if (showDetailsInConsole) {
-              console.log(
+
+              appendFile(
                 `Cell: ${x}${y} is ${n} I:${report.iterations} G:${guessDepth}`
               );
-            }
+            
           }
           if (!board.grid[x][y]) {
             board.missingValues++;
@@ -79,7 +80,7 @@ export default function findFirstSolution(
             if (options.size === 0) {
               failCell = `${x}${y}`;
               noSolution = true;
-              // console.error(`cell:${failCell} has no possible answers`);
+              appendFile(`cell:${failCell} has no possible answers`);
               break;
             }
             if (options.size === 1) {
@@ -90,18 +91,15 @@ export default function findFirstSolution(
               board.numsAvail.decrementNumAvail(answer);
               board.updateCell(answer, x, y);
               BoPV.overwriteCell('', x, y);
-              if (showDetailsInConsole) {
-                console.log(
+                appendFile(
                   `Cell: ${x}${y} assigned value ${answer} I:${report.iterations} G:${guessDepth}`
                 );
-              }
+              
             }
             if (options.size > 1) {
-              if (showDetailsInConsole) {
-                console.log(
-                  `Cell: ${x}${y} has ${options.size} possibilities: ${cellOptions}`
+                appendFile(
+                  `Cell: ${x}${y} has ${options.size} possibilities: ${cellOptions} I:${report.iterations} G:${guessDepth}`
                 );
-              }
               BoPV.updateCellViaArray(cellOptions, x, y);
             }
           }
@@ -149,9 +147,7 @@ export default function findFirstSolution(
                 throw 'ERROR: CELL ALREADY FULL :row';
               }
               if (board.returnSetOfConflicts(g, indexOfN).includes(n)) {
-                if (showDetailsInConsole) {
-                  console.error(`cannot assign ${n} to cell: ${g}${indexOfN}`);
-                }
+                  appendFile(`ERR:cannot assign ${n} to cell: ${g}${indexOfN}`);
                 continue;
               }
               board.grid[g][indexOfN] = n;
@@ -162,14 +158,12 @@ export default function findFirstSolution(
               board.numsAvail.decrementNumAvail(n);
               board.missingValue--;
               groupVF++;
-              if (showDetailsInConsole) {
-                console.log(
+                appendFile(
                   `Cell: ${g}${indexOfN} assigned value ${n} via row g.e. I:${report.iterations} G:${guessDepth}`
                 );
-              }
               if (checkGroupForDuplicate(board.returnRowArray(g))) {
-                console.table(board.grid);
-                console.error(`This cannot be assigned, causes duplicate!`);
+                appendFile(returnBoardAsString(board.grid))
+                appendFile(`ERR:This cannot be assigned, causes duplicate!`);
                 noSolution = true;
                 break;
               }
@@ -201,9 +195,7 @@ export default function findFirstSolution(
                 throw 'ERROR: CELL ALREADY FULL :col';
               }
               if (board.returnSetOfConflicts(indexOfN, g).includes(n)) {
-                if (showDetailsInConsole) {
-                  console.error(`cannot assign ${n} to cell: ${g}${indexOfN}`);
-                }
+                  appendFile(`cannot assign ${n} to cell: ${g}${indexOfN}`);
                 continue;
               }
               if (checkCellForConflicts(indexOfN, g, board)) {
@@ -217,15 +209,12 @@ export default function findFirstSolution(
               board.numsAvail.decrementNumAvail(n);
               board.missingValue--;
               groupVF++;
-              if (showDetailsInConsole) {
-                console.log(
+                appendFile(
                   `Cell: ${indexOfN}${g} assigned value${n} via col g.e. I:${report.iterations} G:${guessDepth}`
                 );
-                console.log(BoPV.returnColArray(g));
-              }
               if (checkGroupForDuplicate(board.returnColArray(g))) {
-                console.table(board.grid);
-                console.error(`This cannot be assigned, causes duplicate!`);
+                appendFile(returnBoardAsString(board.grid))
+                appendFile(`ERR:This cannot be assigned, causes duplicate!`);
                 noSolution = true;
               }
               continue;
@@ -256,9 +245,7 @@ export default function findFirstSolution(
               }
               let { x, y } = BoPV.getCellCoordinateViaSubgridIndex(g, indexOfN);
               if (board.returnSetOfConflicts(x, y).includes(n)) {
-                if (showDetailsInConsole) {
-                  console.error(`cannot assign ${n} to cell: ${x}${y}`);
-                }
+                  appendFile(`cannot assign ${n} to cell: ${x}${y}`);
                 continue;
               }
               if (checkCellForConflicts(x, y, board)) {
@@ -271,14 +258,11 @@ export default function findFirstSolution(
               valuesFound++;
               board.numsAvail.decrementNumAvail(n);
               board.missingValue--;
-              if (showDetailsInConsole) {
-                console.log(
+                appendFile(
                   `Cell: ${xy} assigned value ${n} via sub g.e. I:${report.iterations} G:${guessDepth}`
                 );
-                // console.log(BoPV.returnSubgridArray(g));
-              }
               if (checkGroupForDuplicate(board.returnSubgridArray(g))) {
-                console.error(`This cannot be assigned, causes duplicate!`);
+                appendFile(`ERR:This cannot be assigned, causes duplicate!`);
                 noSolution = true;
                 break;
               }
@@ -325,21 +309,18 @@ export default function findFirstSolution(
           break;
         }
 
-        if (showDetailsInConsole) {
-          console.log(
+          appendFile(
             `Does ${x}${y} = ${p[i]}, it has ${BoPV.grid[x][y]} as options`
           );
-        }
 
         let theoryBoard = structuredClone(board);
         let testValue = p[i];
         theoryBoard.grid[x][y] = testValue;
         BoPV.removeOptionFromCell(p[i], x, y);
-        if (showDetailsInConsole) {
-          console.table(theoryBoard.grid);
-        }
+          appendFile(`Theory Board adding ${p[i]} to cell ${x}${y}`)
+          appendFile(returnBoardAsString(theoryBoard.grid))
         let outgoingReport = structuredClone(report);
-        report = findFirstSolution(
+        report = ffsLogVersion(
           theoryBoard.grid,
           guessDepth,
           outgoingReport
@@ -347,9 +328,7 @@ export default function findFirstSolution(
         theoryBoard.grid = null;
         if (report.solution) {
           end = true;
-          if (showDetailsInConsole) {
-            console.log(`${x}${y} = ${p[i]}`);
-          }
+            appendFile(`Guess Correct! ${x}${y} = ${p[i]}`);
           board = new Board(report.returnBoard);
           report.solution = true;
           break;
@@ -361,9 +340,7 @@ export default function findFirstSolution(
           if (end) {
             break;
           }
-          if (showDetailsInConsole) {
-            console.log(`${x}${y} =/= ${p[i]}`);
-          }
+            appendFile(`Guess Incorrect:${x}${y} =/= ${p[i]}`);
 
           if (checkAllGroupsForDuplicates(board.grid)) {
             console.table(board.grid);
@@ -381,12 +358,11 @@ export default function findFirstSolution(
     }
     if (board.missingValues == 0) {
       let solved = checkFullMatrix(board.grid);
-      console.log(`Solution Valid:${solved}`);
+      appendFile(`Solution Valid:${solved}`);
       if (solved) {
         report.solution = true;
         report.returnBoard = board.grid;
-        //! uncomment later
-        // console.table(board.grid);
+        appendFile(returnBoardAsString(board.grid))
         return report;
       } else {
         // report.solution = false;
@@ -401,8 +377,7 @@ export default function findFirstSolution(
   board.countMissingValues();
   iterateCellsAndGroups();
   if (noSolution) {
-    //! uncomment later
-    // console.log('Branch end');
+    appendFile(`Branch end: Iteration:${report.iterations}`);
     report.solution = false;
     return report;
   }
@@ -414,22 +389,30 @@ export default function findFirstSolution(
   return report;
 }
 
-// let testOne = await fetchPuzzle(4)
-// console.time('Test #1');
-// findFirstSolution(testOne);
-// console.timeEnd('Test #1');
+function parseBoardFromFlatArray(arr){
+    let count = 0;
+    let board = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    for(let x=0;x<9;x++){
+        for(let y=0;y<9;y++){
+            board[x][y] = arr[count]
+            count++
+        }
+    }
+    return board
+}
 
-// let testTwo = await fetchPuzzle(4)
-// console.time('Test #2');
-// findFirstSolution(testTwo);
-// console.timeEnd('Test #2');
-
-// let testThree = await fetchPuzzle(4)
-// console.time('Test #3');
-// findFirstSolution(testThree);
-// console.timeEnd('Test #3');
-
-// let testFour = await fetchPuzzle(4);
-// console.time('Test #4');
-// findFirstSolution(testFour);
-// console.timeEnd('Test #4');
+let x = parseBoardFromFlatArray(failedTries.test1);
+console.table(x)
+console.time('Test')
+ffsLogVersion(x)
+console.timeEnd('Test')
