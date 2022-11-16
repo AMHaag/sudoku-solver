@@ -1,14 +1,12 @@
 'use strict';
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import fetchPuzzle from './borrowPuzzle.mjs';
 import {
   checkFullMatrix,
   checkGroupForDuplicate,
   checkCellForConflicts,
   checkAllGroupsForDuplicates,
 } from './validateSolution.mjs';
-import { Board, BoardOfPossibleValues, emptyStringMatrix } from './classes.mjs';
-import { testCases } from './testCases.mjs';
+import { Board, BoardOfPossibleValues} from './classes.mjs';
 
 Object.freeze(testCases);
 
@@ -42,14 +40,13 @@ export default function findFirstSolution(
     let valuesFound = 0;
     let failCell = '';
     report.iterations++;
-    //! Uncomment later
-    // console.log(
-    //   `*** Iterations: ${
-    //     report.iterations
-    //   }, Guesses: ${guessDepth}, Missing Values: ${
-    //     board.missingValues || 'n/a'
-    //   }`
-    // );
+    console.log(
+      `*** Iterations: ${
+        report.iterations
+      }, Guesses: ${guessDepth}, Missing Values: ${
+        board.missingValues || 'n/a'
+      }`
+    );
     function iterateCells() {
       if (noSolution) {
         return;
@@ -79,7 +76,6 @@ export default function findFirstSolution(
             if (options.size === 0) {
               failCell = `${x}${y}`;
               noSolution = true;
-              // console.error(`cell:${failCell} has no possible answers`);
               break;
             }
             if (options.size === 1) {
@@ -401,8 +397,7 @@ export default function findFirstSolution(
   board.countMissingValues();
   iterateCellsAndGroups();
   if (noSolution) {
-    //! uncomment later
-    // console.log('Branch end');
+    console.log('Branch end');
     report.solution = false;
     return report;
   }
@@ -413,23 +408,3 @@ export default function findFirstSolution(
   makeGuess();
   return report;
 }
-
-// let testOne = await fetchPuzzle(4)
-// console.time('Test #1');
-// findFirstSolution(testOne);
-// console.timeEnd('Test #1');
-
-// let testTwo = await fetchPuzzle(4)
-// console.time('Test #2');
-// findFirstSolution(testTwo);
-// console.timeEnd('Test #2');
-
-// let testThree = await fetchPuzzle(4)
-// console.time('Test #3');
-// findFirstSolution(testThree);
-// console.timeEnd('Test #3');
-
-// let testFour = await fetchPuzzle(4);
-// console.time('Test #4');
-// findFirstSolution(testFour);
-// console.timeEnd('Test #4');
