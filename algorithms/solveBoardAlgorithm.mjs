@@ -31,9 +31,9 @@ export default function findFirstSolution(
   let guessDepth = guesses;
   let noSolution = false;
 
-  // optional debugger stop
-  if (report.iterations > 200_000) {
-    return report
+  //! debugger stop
+  if (report.iterations > 1000) {
+    throw `1k iterations reached`;
   }
   //* =====Subfunctions===== *//
   function iterateCellsAndGroups() {
@@ -369,6 +369,78 @@ export default function findFirstSolution(
         }
       }
     }
+    // for (let x = 0; x < 9; x++) {
+    //   if (end) {
+    //     break;
+    //   }
+    //   for (let y = 0; y < 9; y++) {
+    //     if (end) {
+    //       break;
+    //     }
+    //     let cell = BoPV.returnCell(x, y);
+    //     let cellArrStr = cell.split(' ');
+    //     let cellArr = cellArrStr.map((v) => {
+    //       return Number.parseInt(v);
+    //     });
+    //     if (cellArr.length > 1) {
+    //       for (let i = 0; i < cellArr.length; i++) {
+    //         if (end) {
+    //           break;
+    //         }
+
+    //         //! change this back to showDetailsInConsole
+    //         if (true) {
+    //           console.log(`Does ${x}${y} = ${cellArr[i]}, it has ${BoPV.grid[x][y]} as options`);
+    //         }
+
+    //         let theoryBoard = structuredClone(board);
+    //         let testValue = cellArr[i];
+    //         theoryBoard.grid[x][y] = testValue;
+    //         BoPV.removeOptionFromCell(cellArr[i], x, y);
+    //         if (showDetailsInConsole) {
+    //           console.table(theoryBoard.grid);
+    //         }
+    //         let outgoingReport = structuredClone(report)
+    //         report = findFirstSolution(
+    //           theoryBoard.grid,
+    //           guessDepth,
+    //           outgoingReport
+    //         );
+    //         theoryBoard.grid = null;
+    //         if (report.solution) {
+    //           end = true;
+    //           if (showDetailsInConsole) {
+    //             console.log(`${x}${y} = ${cellArr[i]}`);
+    //           }
+    //           // console.log(`Solution found in guess #${guessDepth}`);
+    //           board = new Board(report.returnBoard);
+    //           report.solution = true;
+    //           break;
+    //         }
+    //         if (end) {
+    //           break;
+    //         }
+    //         if (!report.solution) {
+    //           if (end) {
+    //             break;
+    //           }
+    //           console.log(`${x}${y} =/= ${cellArr[i]}`);
+    //           if (checkAllGroupsForDuplicates(board.grid)) {
+    //             console.table(board.grid);
+    //             throw 'something is wrong';
+    //           }
+    //           continue;
+    //         }
+    //       }
+    //       if (end) {
+    //         break;
+    //       }
+    //     }
+    //   }
+    //   if (end) {
+    //     break;
+    //   }
+    // }
     return;
   }
   function checkForFinishedBoard() {
@@ -381,8 +453,7 @@ export default function findFirstSolution(
       if (solved) {
         report.solution = true;
         report.returnBoard = board.grid;
-        //! uncomment later
-        // console.table(board.grid);
+        console.table(board.grid);
         return report;
       } else {
         // report.solution = false;
