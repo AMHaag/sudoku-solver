@@ -6,9 +6,7 @@ import {
   checkCellForConflicts,
   checkAllGroupsForDuplicates,
 } from './validateSolution.mjs';
-import { Board, BoardOfPossibleValues} from './classes.mjs';
-
-Object.freeze(testCases);
+import { Board, BoardOfPossibleValues } from './classes.mjs';
 
 let defaultReport = {
   solution: false,

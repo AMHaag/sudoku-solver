@@ -102,16 +102,28 @@ function checkAllGroupsForDuplicates(matrix) {
     let testRow = testBoard.returnRowArray(i);
     let testCol = testBoard.returnColArray(i);
     let testSub = testBoard.returnSubgridArray(i);
-    testRow = testRow.filter((cv)=>{if(cv>0){return cv}})
-    testCol = testCol.filter((cv)=>{if(cv>0){return cv}})
-    testSub = testSub.filter((cv)=>{if(cv>0){return cv}})
-  
+    testRow = testRow.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+    testCol = testCol.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+    testSub = testSub.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+
     let testRowSet = new Set(testRow);
     let testColSet = new Set(testCol);
     let testSubSet = new Set(testSub);
     if (testRow.length !== testRowSet.size) {
       console.error(`Duplicate value found in row:${i}`);
-      console.error(`Set:${testRowSet} Post Map Array: ${testRow}`)
+      console.error(`Set:${testRowSet} Post Map Array: ${testRow}`);
       duplicateFound = true;
       break;
     }
@@ -125,6 +137,61 @@ function checkAllGroupsForDuplicates(matrix) {
       duplicateFound = true;
       break;
     }
+  }
+  return duplicateFound;
+}
+function checkBoardForDuplicates_client(matrix) {
+  let testBoard = new Board(matrix);
+  let duplicateFound = false;
+  let errorMessage = [];
+  for (let i = 0; i < 9; i++) {
+    if (duplicateFound) {
+      break;
+    }
+    let testRow = testBoard.returnRowArray(i);
+    let testCol = testBoard.returnColArray(i);
+    let testSub = testBoard.returnSubgridArray(i);
+    testRow = testRow.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+    testCol = testCol.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+    testSub = testSub.filter((cv) => {
+      if (cv > 0) {
+        return cv;
+      }
+    });
+
+    let testRowSet = new Set(testRow);
+    let testColSet = new Set(testCol);
+    let testSubSet = new Set(testSub);
+    if (testRow.length !== testRowSet.size) {
+      errorMessage.push(`Duplicate value found in row:${i + 1}\n`);
+      // console.error(`Duplicate value found in row:${i}`);
+      // console.error(`Set:${testRowSet} Post Map Array: ${testRow}`);
+      duplicateFound = true;
+     
+    }
+    if (testCol.length !== testColSet.size) {
+      errorMessage.push(`Duplicate value found in col:${i + 1}\n`);
+      // console.error(`Duplicate value found in col:${i}`);
+      duplicateFound = true;
+      
+    }
+    if (testSub.length !== testSubSet.size) {
+      errorMessage.push(`Duplicate value found in box:${i + 1}\n`);
+      // console.error(`Duplicate value found in sub:${i}`);
+      duplicateFound = true;
+      
+    }
+  }
+  if (duplicateFound) {
+    return errorMessage;
   }
   return duplicateFound;
 }
@@ -145,12 +212,48 @@ function checkGroupForDuplicate(array) {
   }
   return duplicateFound;
 }
-function checkCellForConflicts(x,y,board){
-  let rowConflicts = checkGroupForDuplicate(board.returnRowArray(x))
-  let colConflicts = checkGroupForDuplicate(board.returnColArray(y))
-  let subConflicts = checkGroupForDuplicate(board.returnSubgridArrayByCoordinate(x,y))
-  if(rowConflicts && colConflicts && subConflicts){return true}
+function checkCellForConflicts(x, y, board) {
+  let rowConflicts = checkGroupForDuplicate(board.returnRowArray(x));
+  let colConflicts = checkGroupForDuplicate(board.returnColArray(y));
+  let subConflicts = checkGroupForDuplicate(
+    board.returnSubgridArrayByCoordinate(x, y)
+  );
+  if (rowConflicts && colConflicts && subConflicts) {
+    return true;
+  }
   return false;
+}
+function checkForInvalidCharacters_client(matrix) {
+  let errorCells = [];
+  for (let x = 0; x < 9; x++) {
+    for (let y = 0; y < 9; y++) {
+      const cell = matrix[x][y]
+      const regex = new RegExp('[\D]')
+      if (!Number.isInteger(cell)) {
+        errorCells.push(`row:${x + 1} col:${y + 1}`);
+        continue;
+      }
+      if (cell > 9 || cell < 0) {
+        errorCells.push(`row:${x + 1} col:${y + 1}`);
+        continue;
+      }
+    }
+  }
+  if (errorCells.length > 0) {
+    return errorCells;
+  }
+  return false;
+}
+
+function countNumberOfClues_client(matrix){
+  const clues = [];
+  for(let x=0;x<9;x++){
+    for (let y=0;y<9;y++){
+      const cell = matrix[x][y]
+      if(cell>0){clues.push(cell)}
+    }
+  }
+  return clues.length
 }
 
 export {
@@ -160,4 +263,7 @@ export {
   checkAllGroupsForDuplicates,
   checkGroupForDuplicate,
   checkCellForConflicts,
+  checkForInvalidCharacters_client,
+  checkBoardForDuplicates_client,
+  countNumberOfClues_client,
 };

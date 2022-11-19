@@ -10,7 +10,7 @@ const Home: NextPage = () => {
     <>
       <Head>
         <title>Sodoku Solver</title>
-        <meta name="sodoku game" content="game" />
+        <meta name="sodoku solver" content="game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles.containerOuter}>
