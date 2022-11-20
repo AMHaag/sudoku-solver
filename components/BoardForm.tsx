@@ -1,3 +1,4 @@
+import Image from 'next/image.js';
 import { ChangeEvent, useState } from 'react';
 import { testCases } from '../algorithms/testCases.mjs';
 import {
@@ -5,7 +6,7 @@ import {
   countNumberOfClues_client,
 } from '../algorithms/validateSolution.mjs';
 import borderStyle from './borderStyleFunction';
-
+import profilePic from '../public/Aaron-Haag.JPG'
 export default function BoardForm() {
   const [board, setBoard] = useState(emptyBoard());
   const [solutionReport, setSolutionReport] = useState(null);
@@ -15,6 +16,8 @@ export default function BoardForm() {
     clueCount: 25,
     invalidCharacterText: null,
   });
+  const [aboutModal, setAboutModal] = useState(false);
+  const [helpModal, setHelpModal] = useState(false);
   function emptyBoard() {
     const cellStyles =
       'w-8 h-8 text-center text-3xl m-0 p-0 md:w-12 md:h-12 md:text-4xl leading-none z-10';
@@ -92,6 +95,8 @@ export default function BoardForm() {
   }
 
   async function solveBoard() {
+    setHelpModal(false);
+    setAboutModal(false);
     function createMatrix() {
       const matrix = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -128,7 +133,7 @@ export default function BoardForm() {
       return matrix;
     }
     const board = createMatrix();
-    //?Error handling, show modal instead of send bad requests to server
+    //? Error handling, show modal instead of send bad requests to server
     const errors = {
       type: null,
       duplicateText: null,
@@ -176,7 +181,7 @@ export default function BoardForm() {
       });
       return;
     }
-    //send valid board to server to solve
+    //? Send valid board to server to solve
     const solution = await fetch('./api/solveboard', {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(board),
@@ -244,6 +249,8 @@ export default function BoardForm() {
         break;
     }
     e.target.selectedIndex = 0;
+    setHelpModal(false);
+    setAboutModal(false);
   }
 
   function resetBoard() {
@@ -256,14 +263,20 @@ export default function BoardForm() {
       clueCount: 0,
       invalidCharacterText: null,
     });
+    setHelpModal(false);
+    setAboutModal(false);
   }
 
-  function Modal(props: {
+  function ErrorModal(props: {
     type: string | null;
     duplicateText?: string | null;
     invalidCharacterText?: string | null;
     clueCount: number;
   }) {
+    if (props.type) {
+      setAboutModal(false);
+      setHelpModal(false);
+    }
     const Header = (
       <h2 className='text-lg uppercase font-red-700'>{props.type}</h2>
     );
@@ -322,17 +335,128 @@ export default function BoardForm() {
       </div>
     );
   }
+  function AboutModal() {
+    return (
+      <div
+        className={
+          'fixed flex justify-center align-middle  left-0  w-full z-10' +
+          ` ${aboutModal ? '' : 'hidden'}`
+        }
+      >
+        <div className='text-center border-2 p-2 w-[288px] md:w-[400px] backdrop-blur backdrop-brightness-95 rounded-xl shadow-xl bg-opacity-30 bg-white border-gray-300'>
+          <h2 className='text-lg '>About this page</h2>
+          <Image src={profilePic} alt='Author Photo' className='rounded-full' height={150} width={150} />
+          <p
+            role='About the Author'
+            className='font-size-xs  font-thin leading-snug '
+          >
+            Hi, my name is Aaron Haag and I'm a full-stack web developer who
+            created this site. <br />
+            It uses a backtracking tree-based algorithm to solve even the most
+            difficult puzzles found in most apps and books. <br />
+            If you'd like to learn more or if you'd like to reach out you can
+            find me on the platforms below.
+          </p>
+          <a className='p-2 text-blue-800'href='https://amhaag.github.io/react-portfolio/'>My portfolio</a>
+          <a className='p-2 text-blue-800' href='https://www.linkedin.com/in/aaron-haag/'>LinkedIn</a>
+          <a className='p-2 text-blue-800' href='https://github.com/AMHaag'>Github</a>
+
+
+          <button
+            className='text-sm md:text-base border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg  bg-white bg-opacity-50'
+            onClick={() => {
+              setAboutModal(false);
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
+  function HelpModal() {
+    return (
+      <div
+        className={
+          'fixed flex justify-center align-middle  left-0  w-full z-10' +
+          ` ${helpModal ? '' : 'hidden'}`
+        }
+      >
+        <div className='text-center border-2 p-2 w-[288px] md:w-[400px] backdrop-blur backdrop-brightness-95 rounded-xl shadow-xl bg-opacity-30 bg-white border-gray-300'>
+          <h2 className='text-lg uppercase font-red-700'>How to use this</h2>
+          <p
+            role='Instructions'
+            className='font-size-xs  font-thin leading-snug '
+          >
+            Enter all known numbers from the puzzle you wish to solve , leaving
+            zeros for unknown cells.
+            <br />
+            You must enter at least 25 clues in order to recieve a result, this
+            constraint is to avoid potentially long waits for solutions.
+            <br />
+            If you would like to just see how quickly the algorithm can solve
+            difficult puzzles you can choose a test puzzle below.
+          </p>
+          <button
+            className='text-sm md:text-base border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg  bg-white bg-opacity-50'
+            onClick={() => {
+              setHelpModal(false);
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
+  function showOptionalModals(option: string) {
+    // event.preventDefault()
+    console.log('button', option);
+    console.log('boop');
+    if (option === 'help') {
+      setAboutModal(false);
+      setHelpModal(true);
+      console.log(`help=${helpModal}\nabout=${aboutModal}`);
+    }
+    if (option === 'about') {
+      console.log('about');
+      setAboutModal(true);
+      setHelpModal(false);
+      console.log(`help=${helpModal}\nabout=${aboutModal}`);
+    }
+  }
 
   return (
     <div>
-      <Modal
+      <ErrorModal
         type={errorMessage.type}
         duplicateText={errorMessage.duplicateText}
         invalidCharacterText={errorMessage.invalidCharacterText}
         clueCount={errorMessage.clueCount}
       />
+      <AboutModal />
+      <HelpModal />
       {board}
-      <div id='control-panel' className='flex justify-evenly'>
+      <div id='control-panel-one' className='flex justify-evenly'>
+        <button
+          className='text-sm  border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg hover:bg-sky-400 bg-gray-200'
+          onClick={() => {
+            showOptionalModals('help');
+          }}
+        >
+          Instructions
+        </button>
+
+        <button
+          className='text-sm  border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg  hover:bg-sky-400 bg-gray-200'
+          onClick={() => {
+            showOptionalModals('about');
+          }}
+        >
+          About this page
+        </button>
+      </div>
+      <div id='control-panel-two' className='flex justify-evenly'>
         <button
           className='text-sm md:text-base border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg hover:bg-sky-400 bg-emerald-300'
           onClick={solveBoard}
