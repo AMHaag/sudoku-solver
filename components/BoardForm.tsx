@@ -6,16 +6,33 @@ import {
   countNumberOfClues_client,
 } from '../algorithm/validateSolution.mjs';
 import borderStyle from './borderStyleFunction';
-import profilePic from '../public/Aaron-Haag.JPG'
+import profilePic from './profilePic.mjs';
+
+interface ErrorObj {
+  type: string | null;
+  duplicateText: string | null;
+  clueCount: number;
+  invalidCharacterText: string | null;
+}
+const defaultErrorObj: ErrorObj = {
+  type: null,
+  duplicateText: null,
+  clueCount: 25,
+  invalidCharacterText: null,
+};
+interface SolutionReport {
+  report: { maxGuessDepth: number; iterations: number };
+  timeToSolve: number;
+}
+const defaultSolutionReport: SolutionReport = {
+  report: { maxGuessDepth: 0, iterations: 0 },
+  timeToSolve: 0,
+};
+
 export default function BoardForm() {
   const [board, setBoard] = useState(emptyBoard());
-  const [solutionReport, setSolutionReport] = useState(null);
-  const [errorMessage, setErrorMessage] = useState({
-    type: null,
-    duplicateText: null,
-    clueCount: 25,
-    invalidCharacterText: null,
-  });
+  const [solutionReport, setSolutionReport] = useState(defaultSolutionReport);
+  const [errorMessage, setErrorMessage] = useState(defaultErrorObj);
   const [aboutModal, setAboutModal] = useState(false);
   const [helpModal, setHelpModal] = useState(false);
   function emptyBoard() {
@@ -119,11 +136,13 @@ export default function BoardForm() {
             invalidInput = true;
             break;
           }
-          const cell =
-            Number.parseInt(cellDOM?.value) ||
-            Number.parseInt(cellDOM?.textContent) ||
-            Number.parseInt(cellDOM?.placeholder) ||
-            0;
+          let cell = 0;
+          if (cellDOM?.textContent) {
+            cell = Number.parseInt(cellDOM?.textContent);
+          }
+          if (cellDOM?.value) {
+            cell = Number.parseInt(cellDOM?.value);
+          }
           matrix[x][y] = cell;
         }
       }
@@ -134,7 +153,7 @@ export default function BoardForm() {
     }
     const board = createMatrix();
     //? Error handling, show modal instead of send bad requests to server
-    const errors = {
+    const errors: ErrorObj = {
       type: null,
       duplicateText: null,
       clueCount: 0,
@@ -194,7 +213,7 @@ export default function BoardForm() {
   }
 
   function showReport() {
-    if (!solutionReport) {
+    if (solutionReport.report.iterations === 0) {
       return (
         <div className='flex justify-center'>
           <h2 className='px-2 text-sm invisible'>
@@ -207,7 +226,7 @@ export default function BoardForm() {
       <div className='flex justify-between'>
         <h2 className='px-2 text-sm'>
           Solved in:{' '}
-          {Math.round(solutionReport ? solutionReport.timeToSolve : '')}ms
+          {Math.round(solutionReport ? solutionReport.timeToSolve : 0)}ms
         </h2>
         <h2 className='px-2 text-sm'>
           Guessed Made:{' '}
@@ -222,7 +241,7 @@ export default function BoardForm() {
 
   function displayExampleBoard(e: ChangeEvent<HTMLSelectElement>) {
     const example = e.target.value;
-    setSolutionReport(null);
+    setSolutionReport(defaultSolutionReport);
     switch (example) {
       case 'easy':
         setBoard(returnBoard(testCases.veryEasy));
@@ -255,7 +274,7 @@ export default function BoardForm() {
 
   function resetBoard() {
     const newBoard = emptyBoard();
-    setSolutionReport(null);
+    setSolutionReport(defaultSolutionReport);
     setBoard(newBoard);
     setErrorMessage({
       type: null,
@@ -345,22 +364,42 @@ export default function BoardForm() {
       >
         <div className='text-center border-2 p-2 w-[288px] md:w-[400px] backdrop-blur backdrop-brightness-95 rounded-xl shadow-xl bg-opacity-30 bg-white border-gray-300'>
           <h2 className='text-lg '>About this page</h2>
-          <Image src={profilePic} alt='Author Photo' className='rounded-full' height={150} width={150} />
+          <Image
+            src={profilePic}
+            alt='Author Photo'
+            className='rounded-full'
+            height={150}
+            width={150}
+          />
           <p
             role='About the Author'
             className='font-size-xs  font-thin leading-snug '
           >
-            Hi, my name is Aaron Haag and I'm a full-stack web developer who
-            created this site. <br />
+            {`Hi, my name is Aaron Haag and I'm a full-stack web developer who
+            created this site.`}
+            <br />
+            {`
             It uses a backtracking tree-based algorithm to solve even the most
-            difficult puzzles found in most apps and books. <br />
-            If you'd like to learn more or if you'd like to reach out you can
-            find me on the platforms below.
+            difficult puzzles found in most apps and books.`}{' '}
+            <br />
+            {`If you'd like to learn more or if you'd like to reach out you can
+            find me on the platforms below.`}
           </p>
-          <a className='p-2 text-blue-800'href='https://amhaag.github.io/react-portfolio/'>My portfolio</a>
-          <a className='p-2 text-blue-800' href='https://www.linkedin.com/in/aaron-haag/'>LinkedIn</a>
-          <a className='p-2 text-blue-800' href='https://github.com/AMHaag'>Github</a>
-
+          <a
+            className='p-2 text-blue-800'
+            href='https://amhaag.github.io/react-portfolio/'
+          >
+            My portfolio
+          </a>
+          <a
+            className='p-2 text-blue-800'
+            href='https://www.linkedin.com/in/aaron-haag/'
+          >
+            LinkedIn
+          </a>
+          <a className='p-2 text-blue-800' href='https://github.com/AMHaag'>
+            Github
+          </a>
 
           <button
             className='text-sm md:text-base border-slate-500 border-2 p-1 mt-1 rounded-md hover:rounded-lg  bg-white bg-opacity-50'

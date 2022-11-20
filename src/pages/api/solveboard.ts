@@ -1,4 +1,4 @@
-import findFirstSolution from "../../../algorithms/solveBoardAlgorithm.mjs";
+import findFirstSolution from "../../../algorithm/solveBoardAlgorithm.mjs";
 import { NextApiResponse, NextApiRequest } from 'next'
 
 
