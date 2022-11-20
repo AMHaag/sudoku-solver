@@ -1,10 +1,10 @@
 import Image from 'next/image.js';
 import { ChangeEvent, useState } from 'react';
-import { testCases } from '../algorithms/testCases.mjs';
+import { testCases } from '../algorithm/testCases.mjs';
 import {
   checkBoardForDuplicates_client,
   countNumberOfClues_client,
-} from '../algorithms/validateSolution.mjs';
+} from '../algorithm/validateSolution.mjs';
 import borderStyle from './borderStyleFunction';
 import profilePic from '../public/Aaron-Haag.JPG'
 export default function BoardForm() {
