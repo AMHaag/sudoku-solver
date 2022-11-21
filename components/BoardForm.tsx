@@ -48,7 +48,7 @@ export default function BoardForm() {
           <td key={cellId} className={`${cellStyles} ${border}`}>
             <input
               id={`${cellId}`}
-              className=' w-8 h-8 m-0 md:w-12 md:h-12 text-center text-2xl md:text-4xl font-light md:font-normal leading-none md:leading-snug focus:bg-cyan-300  invalid:bg-red-300 valid:bg-emerald-200 placeholder-gray-500 placeholder:bg-white b-0'
+              className=' w-8 h-8 m-0 md:w-12 md:h-12 text-center text-2xl md:text-4xl font-light md:font-normal leading-none md:leading-snug focus:bg-cyan-300  invalid:text-red-500  valid:bg-emerald-200 placeholder-gray-500 placeholder:bg-white b-0'
               type='number'
               maxLength={1}
               size={1}
@@ -84,7 +84,7 @@ export default function BoardForm() {
       for (let y = 0; y < 9; y++) {
         const cellId = `${x}${y}`;
         const border = borderStyle(x, y);
-        const bg = subject[x][y] == 0 ? 'bg-red-300 bg-opacity-50' : '';
+        const bg = subject[x][y] == 0 ? 'bg-red-300 bg-opacity-200' : '';
         cellRowArr.push(
           <td
             id={`${cellId}`}
@@ -229,7 +229,7 @@ export default function BoardForm() {
           {Math.round(solutionReport ? solutionReport.timeToSolve : 0)}ms
         </h2>
         <h2 className='px-2 text-sm'>
-          Guessed Made:{' '}
+          Guesses Made:{' '}
           {solutionReport ? solutionReport.report.maxGuessDepth : ''}
         </h2>
         <h2 className='px-2 text-sm'>
