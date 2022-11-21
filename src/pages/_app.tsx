@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import type { AppType } from "next/dist/shared/lib/utils";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {Analytics} from '@vercel/analytics/react'
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const queryClient = new QueryClient({  defaultOptions: {
@@ -9,7 +10,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     },
   },})
   return (
-  <QueryClientProvider client={queryClient}><Component {...pageProps} /></QueryClientProvider>
+  <QueryClientProvider client={queryClient}><Component {...pageProps} /><Analytics/></QueryClientProvider>
 )}
 
 
