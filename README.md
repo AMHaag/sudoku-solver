@@ -19,7 +19,7 @@
     <a href="https://github.com/amhaag/sudoku-solver"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/amhaag/sudoku-solver">View Demo</a>
+    <a href="https://sudoku-solver-amhaag.vercel.app/">View Demo</a>
     ·
     <a href="https://github.com/amhaag/sudoku-solver/issues">Report Bug</a>
     ·
