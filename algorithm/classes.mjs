@@ -757,7 +757,7 @@ export class NumbersAvailable {
       throw 'ERROR:Invalid number';
     }
     if (num < 1 || num > 9) {
-      throw 'ERROR: We only use numbers 1-9 in Sodoku bud.';
+      throw 'ERROR: We only use numbers 1-9 in Sudoku bud.';
     }
     if (typeof avail !== Number) {
       throw 'ERROR: avail must be a Number';
@@ -809,7 +809,7 @@ export class NumbersAvailable {
       throw 'ERROR:Invalid number';
     }
     if (num < 1 || num > 9) {
-      throw 'ERROR: We only use numbers 1-9 in Sodoku bud.';
+      throw 'ERROR: We only use numbers 1-9 in Sudoku bud.';
     }
     switch (num) {
       case 1:

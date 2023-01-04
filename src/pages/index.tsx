@@ -9,14 +9,14 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Sodoku Solver</title>
-        <meta name="sodoku solver" content="game" />
+        <title>Sudoku Solver</title>
+        <meta name="sudoku solver" content="game" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles.containerOuter}>
         <div className={styles.containerInner}>
           <h1 className={styles.title}>
-            Sodoku Solver
+            Sudoku Solver
           </h1>
           <BoardForm/>
         </div>
